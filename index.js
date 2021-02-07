@@ -5,19 +5,14 @@ const io = require("socket.io")(server);
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
 var rooms = {
-  llama: {
-    id: "llama",
-    title: "Llama Room",
+  lobby: {
+    id: "lobby",
+    title: "Lobby Room",
     peers: []
   },
-  gecko: {
-    id: "gecko",
-    title: "Gecko Room",
-    peers: []
-  },
-  flamingo: {
-    id: "flamingo",
-    title: "Flamingo Room",
+  meething: {
+    id: "meething",
+    title: "Meething Room",
     peers: []
   }
 };
@@ -39,10 +34,7 @@ app.get("/r/:id", (req, res) => {
   }
   res.render("room", {
     room: rooms[req.params.id],
-    peerjs: {
-      host: process.env.PEERJS_HOST,
-      port: process.env.PEERJS_PORT
-    }
+    peerjs: {}
   });
 });
 
@@ -77,6 +69,7 @@ io.on("connection", socket => {
     );
     socket.on("disconnect", () => {
       rooms[roomId].peers = rooms[roomId].peers.filter(i => i !== peerId);
+      if (rooms[roomId].peers.length < 1) { delete rooms[roomId]; return }
       socket.to(roomId).broadcast.emit("peer-left-room", peerId);
     });
   });
