@@ -1,0 +1,39 @@
+.peer-container {
+  position: relative;
+  padding-bottom: 100%;
+}
+
+.peer {
+  display: flex;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: #e3e8ef;
+  border-radius: 9999px;
+  text-align: center;
+}
+
+.peer-name {
+  margin: auto;
+  font-weight: 500;
+}
+
+.peer-mute {
+  display: flex;
+  position: absolute;
+  text-align: center;
+  width: 35%;
+  height: 35%;
+  padding-left: 3%;
+  padding-bottom: 1%;
+  background: #fff;
+  border-radius: 9999px;
+  bottom: 0px;
+  right: 0px;
+}
+
+.peer-mute-img {
+  height: 60%;
+  width: 60%;
+  margin: auto;
+}
