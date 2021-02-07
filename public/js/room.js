@@ -1,10 +1,7 @@
 const socket = io("/");
 var remotePeers = {};
 var localStream = null;
-const localPeer = new Peer({
-  host: PEERJS_HOST,
-  port: PEERJS_PORT
-});
+const localPeer = new Peer();
 
 const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
