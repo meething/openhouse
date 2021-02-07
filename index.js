@@ -29,7 +29,8 @@ app.get("/", (req, res) => {
 
 app.get("/r/:id", (req, res) => {
   if (!rooms[req.params.id]) {
-    res.render("404");
+    res.render("rooms", { rooms });
+    //res.render("404");
     return;
   }
   res.render("room", {
@@ -53,7 +54,8 @@ app.post("/rooms", (req, res) => {
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("404");
+  res.render("rooms", { rooms });
+  //res.render("404");
 });
 
 // WEBSOCKETS
