@@ -196,7 +196,8 @@ function notifyMe(msg) {
 }
 
 function mediaAnalyze () {
-    console.log('media analyzer')
+  try {
+    if (!localStream) return;
     var audio = localStream;
     var audioCtx = new AudioContext();
     var analyzer = audioCtx.createAnalyser();
@@ -222,5 +223,10 @@ function mediaAnalyze () {
         requestAnimationFrame(renderFrame);
     }
     renderFrame();
+    
+  } catch(e) {
+    console.log(e);
+  }
+   
 };
 //mediaAnalyze();

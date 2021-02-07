@@ -58,8 +58,8 @@ app.get("*", function(req, res) {
   //res.render("404");
 });
 
-// WEBSOCKETS
 
+// TODO: CONVERT TO MEETHING STYLE!
 io.on("connection", socket => {
   socket.on("join-room", (roomId, peerId) => {
     if (rooms[roomId]) rooms[roomId].peers.push(peerId);

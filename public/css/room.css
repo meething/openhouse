@@ -40,15 +40,16 @@
 }
 
 #bins {
+  z-index:0;
     position: fixed;
-    top: 0px;
-    width: 100%;
+    top: 0%;
+    width: 5%;
     height: 40%;
     -webkit-transition: 0.1s ease all;
 }
 
 .bin {
-    background-color: blue;
+    background-color: gray;
     height: 100%;
     width: 2px;
     float: left;
