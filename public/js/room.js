@@ -31,6 +31,7 @@ localPeer.on("open", localPeerId => {
     addLocalProfile();
     toggleMute();
     notifyMe("Joined! Unmute to speak");
+    mediaAnalyze();
   });
 });
 
@@ -193,3 +194,33 @@ function notifyMe(msg) {
   // At last, if the user has denied notifications, and you
   // want to be respectful there is no need to bother them any more.
 }
+
+function mediaAnalyze () {
+    console.log('media analyzer')
+    var audio = localStream;
+    var audioCtx = new AudioContext();
+    var analyzer = audioCtx.createAnalyser();
+    var source = audioCtx.createMediaStreamSource(audio);
+    source.connect(analyzer);
+    // analyzer.connect(audioCtx.destination);
+    analyzer.fftSize = 128;
+
+    var frequencyData = new Uint8Array(analyzer.frequencyBinCount);
+
+    var bins = [];
+    frequencyData.forEach(function(e) {
+        var e = document.createElement('div');
+        e.classList.add('bin');
+        document.getElementById('bins').appendChild(e);
+        bins.push(e);
+    });
+    function renderFrame() {
+        analyzer.getByteFrequencyData(frequencyData);
+        frequencyData.forEach(function (data, index) {
+            bins[index].style.height = ((data * 100) / 256) + "%";
+        });
+        requestAnimationFrame(renderFrame);
+    }
+    renderFrame();
+};
+//mediaAnalyze();
