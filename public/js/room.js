@@ -62,7 +62,8 @@ function onToggleMute() {
     !localStream.getAudioTracks()[0].enabled ||
     localStream.getAudioTracks()[0].muted;
   muteButton.innerHTML = isMuted ? "Unmute" : "Mute";
-  element.classList.toggle("mystyle");
+  muteButton.classList.toggle("bg-red-300");
+  muteButton.classList.toggle("bg-gray-300");
   var muteElem = document.getElementById("local-peer-mute");
   muteElem.style.opacity = isMuted ? 1 : 0;
   socket.emit("toggle-mute", localPeer.id, isMuted);
