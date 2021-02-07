@@ -29,6 +29,8 @@ localPeer.on("open", localPeerId => {
     socket.on("peer-toggled-mute", onPeerToggleMute);
     socket.emit("join-room", ROOM_ID, localPeerId);
     addLocalProfile();
+    toggleMute();
+    notifyMe("Joined! Unmute to speak");
   });
 });
 
@@ -50,7 +52,7 @@ function leaveRoom(e) {
 }
 
 function toggleMute(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   const track = localStream.getAudioTracks()[0];
   if (!track.muted) track.enabled = !track.enabled;
   // TODO else display warning (cannot record audio in this case)
