@@ -7,7 +7,6 @@ const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
 const shareButton = document.getElementById("share-button");
 
-
 localPeer.on("open", localPeerId => {
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
@@ -38,12 +37,12 @@ localPeer.on("open", localPeerId => {
 function onPeerJoined(remotePeerId, localStream) {
   const call = localPeer.call(remotePeerId, localStream);
   call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
-  notifyMe("joined "+remotePeerId);
+  notifyMe("joined " + remotePeerId);
 }
 
 function onPeerLeft(remotePeerId) {
   if (remotePeers[remotePeerId]) remotePeers[remotePeerId].close();
-  notifyMe("left "+remotePeerId);
+  notifyMe("left " + remotePeerId);
 }
 
 function leaveRoom(e) {
@@ -138,13 +137,12 @@ function addPeerProfile(call, stream) {
   peerGrid.appendChild(container);
 }
 
-
 function shareUrl() {
   if (!window.getSelection) {
-    alert('Clipboard not available, sorry!');
+    alert("Clipboard not available, sorry!");
     return;
   }
-  const dummy = document.createElement('p');
+  const dummy = document.createElement("p");
   dummy.textContent = window.location.href;
   document.body.appendChild(dummy);
 
@@ -157,16 +155,14 @@ function shareUrl() {
   selection.removeAllRanges();
   selection.addRange(range);
 
-  document.execCommand('copy');
+  document.execCommand("copy");
   document.body.removeChild(dummy);
-  
+
   notifyMe("link shared to clipboard");
   shareButton.innerHTML = "CTRL-V";
-  setTimeout(function(){ 
+  setTimeout(function() {
     shareButton.innerHTML = "Share";
   }, 1000);
-
-  
 }
 
 function notifyMe(msg) {
@@ -183,7 +179,7 @@ function notifyMe(msg) {
 
   // Otherwise, we need to ask the user for permission
   else if (Notification.permission !== "denied") {
-    Notification.requestPermission().then(function (permission) {
+    Notification.requestPermission().then(function(permission) {
       // If the user accepts, let's create a notification
       if (permission === "granted") {
         var notification = new Notification(msg);
@@ -195,7 +191,7 @@ function notifyMe(msg) {
   // want to be respectful there is no need to bother them any more.
 }
 
-function mediaAnalyze () {
+function mediaAnalyze() {
   try {
     if (!localStream) return;
     var audio = localStream;
@@ -210,23 +206,21 @@ function mediaAnalyze () {
 
     var bins = [];
     frequencyData.forEach(function(e) {
-        var e = document.createElement('div');
-        e.classList.add('bin');
-        document.getElementById('bins').appendChild(e);
-        bins.push(e);
+      var e = document.createElement("div");
+      e.classList.add("bin");
+      document.getElementById("bins").appendChild(e);
+      bins.push(e);
     });
     function renderFrame() {
-        analyzer.getByteFrequencyData(frequencyData);
-        frequencyData.forEach(function (data, index) {
-            bins[index].style.height = ((data * 100) / 256) + "%";
-        });
-        requestAnimationFrame(renderFrame);
+      analyzer.getByteFrequencyData(frequencyData);
+      frequencyData.forEach(function(data, index) {
+        bins[index].style.height = (data * 100) / 256 + "%";
+      });
+      requestAnimationFrame(renderFrame);
     }
     renderFrame();
-    
-  } catch(e) {
+  } catch (e) {
     console.log(e);
   }
-   
-};
+}
 //mediaAnalyze();
