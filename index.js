@@ -58,7 +58,6 @@ app.get("*", function(req, res) {
   //res.render("404");
 });
 
-
 // TODO: CONVERT TO MEETHING STYLE!
 io.on("connection", socket => {
   socket.on("join-room", (roomId, peerId) => {
@@ -71,7 +70,10 @@ io.on("connection", socket => {
     );
     socket.on("disconnect", () => {
       rooms[roomId].peers = rooms[roomId].peers.filter(i => i !== peerId);
-      if (rooms[roomId].peers.length < 1 && roomId != 'lobby') { delete rooms[roomId]; return }
+      if (rooms[roomId].peers.length < 1 && roomId != "lobby") {
+        delete rooms[roomId];
+        return;
+      }
       socket.to(roomId).broadcast.emit("peer-left-room", peerId);
     });
   });
