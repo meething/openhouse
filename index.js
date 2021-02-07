@@ -7,12 +7,12 @@ const { v4: uuidv4 } = require("uuid");
 var rooms = {
   lobby: {
     id: "lobby",
-    title: "Lobby Room",
+    title: "Lobby",
     peers: []
   },
   meething: {
     id: "meething",
-    title: "Meething Room",
+    title: "Meething",
     peers: []
   }
 };
