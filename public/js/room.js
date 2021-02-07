@@ -35,10 +35,12 @@ localPeer.on("open", localPeerId => {
 function onPeerJoined(remotePeerId, localStream) {
   const call = localPeer.call(remotePeerId, localStream);
   call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
+  notifyMe("joined "+remotePeerId);
 }
 
 function onPeerLeft(remotePeerId) {
   if (remotePeers[remotePeerId]) remotePeers[remotePeerId].close();
+  notifyMe("left "+remotePeerId);
 }
 
 function leaveRoom(e) {
