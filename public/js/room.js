@@ -5,6 +5,8 @@ const localPeer = new Peer();
 
 const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
+const shareButton = document.getElementById("share-button");
+
 
 localPeer.on("open", localPeerId => {
   const opt = { video: false, audio: true };
@@ -127,4 +129,34 @@ function addPeerProfile(call, stream) {
   remotePeers[call.peer] = call;
   call.on("close", () => container.remove());
   peerGrid.appendChild(container);
+}
+
+
+function shareUrl() {
+  if (!window.getSelection) {
+    alert('Clipboard not available, sorry!');
+    return;
+  }
+  const dummy = document.createElement('p');
+  dummy.textContent = window.location.href;
+  document.body.appendChild(dummy);
+
+  const range = document.createRange();
+  range.setStartBefore(dummy);
+  range.setEndAfter(dummy);
+
+  const selection = window.getSelection();
+  // First clear, in case the user already selected some other text
+  selection.removeAllRanges();
+  selection.addRange(range);
+
+  document.execCommand('copy');
+  document.body.removeChild(dummy);
+  
+  shareButton.innerHTML = "CTRL-V";
+  setTimeout(function(){ 
+    shareButton.innerHTML = "Share";
+  }, 1000);
+
+  
 }
