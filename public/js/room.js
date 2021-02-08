@@ -2,10 +2,13 @@ const socket = io("/");
 var remotePeers = {};
 var localStream = null;
 const localPeer = new Peer();
+var lock = false;
 
 const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
 const shareButton = document.getElementById("share-button");
+const lockButton = document.getElementById("lock-button");
+
 
 localPeer.on("open", localPeerId => {
   const opt = { video: false, audio: true };
@@ -223,4 +226,20 @@ function mediaAnalyze() {
     console.log(e);
   }
 }
-//mediaAnalyze();
+
+function lockRoom(roomname) {
+  lock = lock ? false : true;
+  lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
+  console.log('switch lock!',lock,roomname);
+  fetch(window.location.protocol + "rooms", {
+    method: "POST",
+    cache: "no-cache",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: roomname,
+      locked: lock
+    })
+  })
+    .then(res => e => console.log(res))
+    .catch(e => console.log(e));
+}

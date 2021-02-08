@@ -22,6 +22,7 @@
       <div class="flex flex-row">
         <button id="leave-button" onClick="leaveRoom(event)" style="margin-left: 0em" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full">Leave</button>
         <button id="share-button" onClick="shareUrl()" style="margin-left: 0.5em" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full">Share</button>
+        <button id="lock-button" onClick="lockRoom("<%= room.title %>")" style="margin-left: 0.5em" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-full">&#128275;</button>
         <button id="mute-button" onClick="toggleMute(event)" style="margin-left: 0.5em" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-full">Mute</button>
       </div>
       
