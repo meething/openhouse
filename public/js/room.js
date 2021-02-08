@@ -229,7 +229,7 @@ function mediaAnalyze() {
 
 function lockRoom(roomname) {
   lock = lock ? false : true;
-  //lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
+  lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
   console.log('switch lock!',lock,roomname);
   fetch(window.location.protocol + "rooms", {
     method: "POST",
