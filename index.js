@@ -8,12 +8,14 @@ var rooms = {
   lobby: {
     id: "lobby",
     title: "Lobby",
-    peers: []
+    peers: [],
+    locked: false
   },
   meething: {
     id: "meething",
     title: "Meething",
-    peers: []
+    peers: [],
+    locked: false
   }
 };
 

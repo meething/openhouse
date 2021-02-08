@@ -10,7 +10,8 @@ function startRoom() {
     cache: "no-cache",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      title: roomname
+      title: roomname,
+      locked: false
     })
   })
     .then(res => res.json())
