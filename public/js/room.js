@@ -162,9 +162,9 @@ function shareUrl() {
   document.body.removeChild(dummy);
 
   notifyMe("link shared to clipboard");
-  shareButton.innerHTML = "CTRL-V";
+  shareButton.innerHTML = "Ctrl-v";
   setTimeout(function() {
-    shareButton.innerHTML = "Share";
+    shareButton.innerHTML = "Link";
   }, 1000);
 }
 
