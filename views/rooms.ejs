@@ -13,13 +13,11 @@
     <div class="max-w-4xl min-h-screen box-border px-10 py-5 mx-auto my-0">
       <h1 style="display: inline;" class="text-5xl my-10 " >openhøüse</h1>
       <button onClick="startRoom()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 mt-4 mb-12 w-full rounded-full">+ Start a Room</button>
-      <div class="grid grid-cols-3 gap-4">
-        <% for (var i = 0; i < Object.values(rooms).length; i++) { %>        
-            <div><%= Object.values(rooms)[i].title %> (<%= Object.values(rooms)[i].peers.length %>)              
-            <button onClick="joinRoom(event)" name="<%= Object.values(rooms)[i].id %>">
-              <img class="inline-block h-60 w-60 rounded-full ring-2 ring-white" src="https://i.pravatar.cc/256?u=<%= Object.values(rooms)[i].id %>" alt="">
+      <div>
+        <% for (var i = 0; i < Object.values(rooms).length; i++) { %>
+            <button onClick="joinRoom(event)" class="w-full px-6 py-4 mb-2 bg-gray-200 hover:bg-gray-300 rounded-md font-medium" name="<%= Object.values(rooms)[i].id %>">
+              <%= Object.values(rooms)[i].title %> (<%= Object.values(rooms)[i].peers.length %>)
             </button>
-        </div>
         <% } %>
       </div>
     </div>
