@@ -17,7 +17,7 @@
         <% for (var i = 0; i < Object.values(rooms).length; i++) { %>        
             <div><%= Object.values(rooms)[i].title %> (<%= Object.values(rooms)[i].peers.length %>)              
             <button onClick="joinRoom(event)" name="<%= Object.values(rooms)[i].id %>">
-              <img class="inline-block h-60 w-60 rounded-full ring-2 ring-white" src="https://i.pravatar.cc/256?u="<%= Object.values(rooms)[i].id %>" alt="">
+              <img class="inline-block h-60 w-60 rounded-full ring-2 ring-white" src="https://i.pravatar.cc/256?u=<%= Object.values(rooms)[i].id %>" alt="">
             </button>
         </div>
         <% } %>
