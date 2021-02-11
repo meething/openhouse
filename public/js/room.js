@@ -4,10 +4,12 @@ var localStream = null;
 const localPeer = new Peer();
 var lock = false;
 
+
 const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
 const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
+const screenButton = document.getElementById("screen-button");
 
 
 localPeer.on("open", localPeerId => {
@@ -138,6 +140,25 @@ function addPeerProfile(call, stream) {
   remotePeers[call.peer] = call;
   call.on("close", () => container.remove());
   peerGrid.appendChild(container);
+  registerPeerTrack();
+}
+
+function registerPeerTrack () { //TODO HELP
+  // get the peers and add a listener on tracks
+  var keys = Object.keys(remotePeers);
+  for (var i = 0; i < keys.length; i++) {
+      let remoteStream = remotePeers[keys[0]]._remoteStream;
+      remoteStream.onaddtrack = function(ev) {
+        console.log(ev, remotePeers[keys[i]]);
+        var videoElement = document.getElementById('shareview');
+        videoElement.srcObject = remotePeers[keys[i]]._remoteStream;
+       }
+      remoteStream.onremovetrack = function(ev) {
+        console.log(ev, remotePeers[keys[i]]);
+        var videoElement = document.getElementById('shareview');
+        videoElement.srcObject = null;
+      }
+  }
 }
 
 function shareUrl() {
@@ -166,6 +187,43 @@ function shareUrl() {
   setTimeout(function() {
     shareButton.innerHTML = "Share";
   }, 1000);
+}
+
+var sharingScreen = false;
+
+async function shareScreen (ev) {
+  // Get reference to video element
+  let videoElement = document.getElementById('shareview');
+  // if we are already sharing, stop the sharing.
+  if(sharingScreen) {
+    let tracks = videoElement.srcObject.getTracks();
+    tracks.forEach(track => track.stop());
+    videoElement.srcObject = null;
+    sharingScreen = false;
+    return;
+   }
+  // user asked to share their screen
+  let sharedScreenStream = null;
+  // create config object
+  let config = {video:{cursor:'always'},audio:false };
+  try {
+    sharedScreenStream = await navigator.mediaDevices.getDisplayMedia(config);
+    sharingScreen = true;
+    // pass shared screen to function to add track to sending
+    sendScreenToAll(sharedScreenStream.getVideoTracks()[0]);
+  } catch (e) {
+    console.log('screencapture issue: ', e);
+  }
+  // set shared screen so we can see we are sharing something
+  videoElement.srcObject = sharedScreenStream;
+
+  return;
+}
+
+async function sendScreenToAll (videoTrack) {
+  localPeer._connections.forEach((peer, i) => {
+    peer._localStream.addTrack(videoTrack);
+  });
 }
 
 function notifyMe(msg) {
