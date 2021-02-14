@@ -16,7 +16,9 @@
     "socket.io": "^2.3.0",
     "tailwindcss": "^1.7.3",
     "uuid": "^8.3.2",
-    "body-parser": "^1.19.0"
+    "body-parser": "^1.19.0",
+    "hyperswarm-web": "^2.1.1",
+    "crypto": "^1.0.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

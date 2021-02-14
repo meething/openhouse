@@ -2,6 +2,10 @@ const express = require("express");
 const app = express();
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
+
+const hyperswarm = require("hyperswarm-web");
+const crypto = require("crypto");
+
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
 var rooms = {
@@ -61,6 +65,7 @@ app.get("*", function(req, res) {
 });
 
 // TODO: CONVERT TO MEETHING STYLE!
+
 io.on("connection", socket => {
   socket.on("join-room", (roomId, peerId) => {
     if (rooms[roomId]) rooms[roomId].peers.push(peerId);
