@@ -3,9 +3,6 @@ const app = express();
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
 
-const hyperswarm = require("hyperswarm-web");
-const crypto = require("crypto");
-
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
 var rooms = {
@@ -85,5 +82,30 @@ io.on("connection", socket => {
     });
   });
 });
+
+/*
+try {
+
+  const hyperswarm = require("hyperswarm-web");
+  const crypto = require("crypto");
+  
+  const swarm = hyperswarm({});
+  // look for peers listed under this topic
+  const topic = crypto.createHash('sha256')
+    .update('openhouse-meething')
+    .digest()
+
+  swarm.join(topic)
+
+  swarm.on('connection', (socket, details) => {
+    console.log('new connection!', details)
+
+    // you can now use the socket as a stream, eg:
+    // socket.pipe(hypercore.replicate()).pipe(socket)
+  })  
+} catch(e){
+  console.log('hyperfail',e);
+}
+*/
 
 server.listen(process.env.PORT || 3000);
