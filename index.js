@@ -87,7 +87,7 @@ try {
   const hyperswarm = require("hyperswarm-web");
   const crypto = require("crypto");
 
-  const swarm = hyperswarm({});
+  const swarm = hyperswarm();
   // look for peers listed under this topic
   const topic = crypto
     .createHash("sha256")
