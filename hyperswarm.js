@@ -2,15 +2,13 @@ const crypto = require("crypto");
 const duplexify = require("duplexify");
 const hyperswarm = require('hyperswarm-web')
 
+const DEFAULT_WEBRTC_BOOTSTRAP = ['wss://signal.dat-web.eu', 'wss://geut-webrtc-signal-v3.glitch.me']
+const DEFAULT_PROXY_SERVER = ['wss://hyperswarm.mauve.moe'];
+
+
 function initiate(topic, opts) {
-  let net = hyperswarm({  
-    bootstrap: ['ws://'+process.env.HYPERPROXY],
-    wsProxy: [
-    'ws://'+process.env.HYPERPROXY+'/proxy'
-    ],
-    webrtcBootstrap: [
-      'ws://'+process.env.HYPERPROXY+'/signal'
-    ]
+  let net = hyperswarm({
+    bootstrap: DEFAULT_PROXY_SERVER
   });
   // look for peers listed under this topic
   var topicBuffer = crypto
