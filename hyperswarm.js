@@ -1,9 +1,17 @@
 const crypto = require("crypto");
 const duplexify = require("duplexify");
-const hyperswarm = require("hyperswarm");
+const hyperswarm = require('hyperswarm-web')
 
 function initiate(topic, opts) {
-  let net = hyperswarm();
+  let net = hyperswarm({  
+    bootstrap: ['ws://'+process.env.HYPERPROXY],
+    wsProxy: [
+    'ws://'+process.env.HYPERPROXY+'/proxy'
+    ],
+    webrtcBootstrap: [
+      'ws://'+process.env.HYPERPROXY+'/signal'
+    ]
+  });
   // look for peers listed under this topic
   var topicBuffer = crypto
     .createHash("sha256")
@@ -25,7 +33,7 @@ exports.connect = function(topic, cb) {
   net.on("connection", (socket, details) => {
     if (details.peer)
       console.error(
-        "hyper-lru connected to",
+        "hyperswarm connected to",
         details.peer.host,
         details.peer.port
       );

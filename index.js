@@ -84,10 +84,11 @@ io.on("connection", socket => {
 });
 
 try {
+  console.log('trying to connect...')
   const net = require('./hyperswarm.js');
   net.connect('openhouse-meething', (err, socket) => {
 				if (err) {
-					console.error('`hyper` connectivity failure');
+					console.log('hyper connectivity failure');
 				} else {
           console.log('hyper connected')
           socket.write(JSON.stringify({t:'join', key:123, value:123}) + '\n');
