@@ -87,11 +87,13 @@ try {
   const hyperswarm = require("hyperswarm-web");
   const crypto = require("crypto");
 
-  const swarm = hyperswarm();
+  const swarm = hyperswarm({
+  // Specify a server list of HyperswarmServer instances
+  bootstrap: ['ws://hyperswarm-web.glitch.me']});
   // look for peers listed under this topic
   const topic = crypto
     .createHash("sha256")
-    .update("openhouse-meething")
+    .update("openhouse-meething") 
     .digest();
 
   swarm.join(topic);
@@ -99,23 +101,6 @@ try {
 
   swarm.on("connection", (socket, details) => {
     console.log("new connection!", details);
-    socket.on("join-room", (roomId, peerId) => {
-      if (rooms[roomId]) rooms[roomId].peers.push(peerId);
-      else rooms[roomId] = { title: null, peers: [peerId] };
-      socket.join(roomId);
-      socket.to(roomId).broadcast.emit("peer-joined-room", peerId);
-      socket.on("toggle-mute", (peerId, isMuted) =>
-        socket.to(roomId).broadcast.emit("peer-toggled-mute", peerId, isMuted)
-      );
-      socket.on("disconnect", () => {
-        rooms[roomId].peers = rooms[roomId].peers.filter(i => i !== peerId);
-        if (rooms[roomId].peers.length < 1 && roomId != "lobby") {
-          delete rooms[roomId];
-          return;
-        }
-        socket.to(roomId).broadcast.emit("peer-left-room", peerId);
-      });
-    });
 
     // you can now use the socket as a stream, eg:
     // socket.pipe(hypercore.replicate()).pipe(socket)
