@@ -2,7 +2,8 @@ const crypto = require("crypto");
 const hyperswarm = require('hyperswarm-web')
 
 const DEFAULT_WEBRTC_BOOTSTRAP = ['wss://signal.dat-web.eu', 'wss://geut-webrtc-signal-v3.glitch.me']
-const DEFAULT_PROXY_SERVER = 'ws://socket.hepic.io:''wss://hyperswarm.mauve.moe';
+const DEFAULT_PROXY_SERVER = 'wss://hyperswarm.mauve.moe';
+const BOOT = 'ws://socket.hepic.io:4977';
 
 function initiate(topic, opts) {
   console.log('connecting to hyper...');
@@ -10,10 +11,12 @@ function initiate(topic, opts) {
     announceLocalAddress: true,
     bootstrap: DEFAULT_WEBRTC_BOOTSTRAP,
     wsProxy: [
-      DEFAULT_PROXY_SERVER+'/proxy'
+      DEFAULT_PROXY_SERVER+'/proxy',
+      BOOT+'/proxy'
     ],
     webrtcBootstrap: [
-      DEFAULT_PROXY_SERVER+'/signal'
+      DEFAULT_PROXY_SERVER+'/signal',
+      BOOT+'/signal'
     ]
   });
   // look for peers listed under this topic
