@@ -85,27 +85,3 @@ io.on("connection", socket => {
 
 server.listen(process.env.PORT || 3000);
 
-
-// Hyper
-
-try {
-  const net = require('./hyperswarm.js');
-  net.connect('openhouse-meething', (err, socket) => {
-				if (err) {
-					console.log('hyper connectivity failure');
-				} else {
-          console.log('hyper connected')
-          socket.write(JSON.stringify({t:'join', msg:'supertest'}) + '\n');
-        }
-				socket.on('data', function(data) {
-				  try {
-					  const obj = JSON.parse(data.toString());
-            console.log('got',obj);
-				  } catch(e) { console.error('not json', data.toString()); }
-				});
-
-		});
-
-} catch (e) {
-  console.log("hyperfail", e);
-}
