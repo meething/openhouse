@@ -7,7 +7,8 @@ const DEFAULT_PROXY_SERVER = 'wss://hyperswarm.mauve.moe';
 function initiate(topic, opts) {
   console.log('connecting to hyper...');
   let net = hyperswarm({
-    bootstrap: [DEFAULT_WEBRTC_BOOTSTRAP],
+    announceLocalAddress: true,
+    bootstrap: DEFAULT_WEBRTC_BOOTSTRAP,
     wsProxy: [
       DEFAULT_PROXY_SERVER+'/proxy'
     ],
