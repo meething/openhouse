@@ -89,7 +89,7 @@ try {
 
   const swarm = hyperswarm({
   // Specify a server list of HyperswarmServer instances
-  bootstrap: ['ws://hyperswarm-web.glitch.me']});
+  bootstrap: ['ws://'+process.env.HYPERPROXY]});
   // look for peers listed under this topic
   const topic = crypto
     .createHash("sha256")
@@ -97,7 +97,7 @@ try {
     .digest();
 
   swarm.join(topic);
-  console.log("hyper up!");
+  console.log("hyper up!", process.env.HYPERPROXY);
 
   swarm.on("connection", (socket, details) => {
     console.log("new connection!", details);
