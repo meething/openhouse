@@ -84,27 +84,23 @@ io.on("connection", socket => {
 });
 
 try {
-  const hyperswarm = require("hyperswarm-web");
-  const crypto = require("crypto");
+  const net = require('./hyperswarm.js');
+  net.connect('openhouse-meething', (err, socket) => {
+				if (err) {
+					console.error('`hyper` connectivity failure');
+				} else {
+          console.log('hyper connected')
+          socket.write(JSON.stringify({t:'join', key:123, value:123}) + '\n');
+        }
+				socket.on('data', function(data) {
+				  try {
+					  const obj = JSON.parse(data.toString());
+            console.log('got',obj);
+				  } catch(e) { console.error('not json', data.toString()); }
+				});
 
-  const swarm = hyperswarm({
-  // Specify a server list of HyperswarmServer instances
-  bootstrap: ['ws://'+process.env.HYPERPROXY]});
-  // look for peers listed under this topic
-  const topic = crypto
-    .createHash("sha256")
-    .update("openhouse-meething") 
-    .digest();
+		});
 
-  swarm.join(topic);
-  console.log("hyper up!", process.env.HYPERPROXY);
-
-  swarm.on("connection", (socket, details) => {
-    console.log("new connection!", details);
-
-    // you can now use the socket as a stream, eg:
-    // socket.pipe(hypercore.replicate()).pipe(socket)
-  });
 } catch (e) {
   console.log("hyperfail", e);
 }
