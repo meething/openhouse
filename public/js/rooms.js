@@ -26,3 +26,10 @@ function uuidv4() {
     return v.toString(16);
   });
 }
+
+
+function gunGetRooms(room){
+  console.log('get gun rooms');
+  var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], musticast: false, localStorage: false, radisk: false, file: false});
+  
+}
