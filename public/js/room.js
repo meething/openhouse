@@ -75,8 +75,12 @@ function onToggleMute() {
 }
 
 function onPeerToggleMute(peerId, isMuted) {
-  var muteElem = document.getElementById(peerId + "-peer-mute");
-  muteElem.style.opacity = isMuted ? 1 : 0;
+  try {
+    var muteElem = document.getElementById(peerId + "-peer-mute");
+    muteElem.style.opacity = isMuted ? 1 : 0;
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function addLocalProfile() {
@@ -193,6 +197,53 @@ function notifyMe(msg) {
   // At last, if the user has denied notifications, and you
   // want to be respectful there is no need to bother them any more.
 }
+
+/* Screen Sharing Code */
+
+var sharingScreen = false;
+
+async function shareScreen (ev) {
+  // Get reference to video element
+  let videoElement = document.getElementById('shareview');
+  // if we are already sharing, stop the sharing.
+  if(sharingScreen) {
+    let tracks = videoElement.srcObject.getTracks();
+    tracks.forEach(track => track.stop());
+    videoElement.srcObject = null;
+    sharingScreen = false;
+    return;
+   }
+  // user asked to share their screen
+  let sharedScreenStream = null;
+  // create config object
+  let config = {video:{cursor:'always'},audio:false };
+  try {
+    sharedScreenStream = await navigator.mediaDevices.getDisplayMedia(config);
+    sharingScreen = true;
+    // pass shared screen to function to add track to sending
+    sendScreenToAll(sharedScreenStream)//sharedScreenStream.getVideoTracks()[0]);
+  } catch (e) {
+    console.log('screencapture issue: ', e);
+  }
+  // set shared screen so we can see we are sharing something
+  videoElement.srcObject = sharedScreenStream;
+
+  return;
+}
+
+async function sendScreenToAll (videoTrack) {
+  localPeer._connections.forEach((peer, i) => {
+    console.log(videoTrack);
+    try {
+      localPeer.call(peer[0].id, videoTrack)
+    } catch (e) {
+      console.log(e);
+    }
+  });
+}
+
+
+/* End Screen Sharing Code */
 
 function mediaAnalyze() {
   try {
