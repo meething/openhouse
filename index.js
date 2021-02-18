@@ -17,6 +17,12 @@ var rooms = {
     title: "Meething",
     peers: [],
     locked: false
+  },
+   ctzn: {
+    id: "ctzn",
+    title: "CTZN",
+    peers: [],
+    locked: false
   }
 };
 
