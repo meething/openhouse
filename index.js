@@ -3,8 +3,8 @@ const app = express();
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
 
-const uWS = require('uwebsockets.js');
-let ejs = require('ejs');
+var Gun = require('gun');
+var gun = Gun({web: server});
 
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
@@ -96,30 +96,3 @@ server.listen(process.env.PORT || 3000);
 
 
 
-/*
-
-uWS.App().ws('/*', {
-
-  idleTimeout: 30,
-  maxBackpressure: 1024,
-  maxPayloadLength: 512,
-  compression: DEDICATED_COMPRESSOR_3KB,
-
-  message: (ws, message, isBinary) => {
-  
-    let ok = ws.send(message, isBinary, true);
-  }
-  
-}).get('/*', (res, req) => {
-
-  res.writeStatus('200 OK').writeHeader('IsExample', 'Yes').end('Hello there!');
-  
-}).listen(9001, (listenSocket) => {
-
-  if (listenSocket) {
-    console.log('Listening to port 9001');
-  }
-  
-});
-
-*/

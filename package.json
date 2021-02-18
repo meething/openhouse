@@ -27,7 +27,7 @@
     "crypto": "^1.0.1",
     "hyperswarm": "^2.15.3",
     "duplexify": "^4.1.1",
-    "uwebsockets.js": "^18.3.3"
+    "gun": "^0.2020.520"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"
