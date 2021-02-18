@@ -4,10 +4,13 @@ const server = require("http").Server(app);
 const io = require("socket.io")(server);
 
 var Gun = require('gun');
-var gun = Gun({web: server});
+var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], musticast: false, localStorage: false, radisk: false, file: false});
+
 
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
+
+var gunRooms = gun.get('rooms');
 var rooms = {
   lobby: {
     id: "lobby",
@@ -46,6 +49,7 @@ app.get("/r/:id", (req, res) => {
     return;
   }
   res.render("room", {
+    gunRoom: gunRooms.get(req.params.id),
     room: rooms[req.params.id],
     peerjs: {}
   });
