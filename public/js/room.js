@@ -216,12 +216,12 @@ async function shareScreen (ev) {
   // user asked to share their screen
   let sharedScreenStream = null;
   // create config object
-  let config = {video:{cursor:'always'},audio:false };
+  let config = {video:{cursor:'always'}, audio:false};
   try {
     sharedScreenStream = await navigator.mediaDevices.getDisplayMedia(config);
     sharingScreen = true;
     // pass shared screen to function to add track to sending
-    sendScreenToAll(sharedScreenStream)//sharedScreenStream.getVideoTracks()[0]);
+    sendScreenToAll(sharedScreenStream)
   } catch (e) {
     console.log('screencapture issue: ', e);
   }
@@ -231,11 +231,11 @@ async function shareScreen (ev) {
   return;
 }
 
-async function sendScreenToAll (videoTrack) {
+async function sendScreenToAll (mediaStream) {
   localPeer._connections.forEach((peer, i) => {
-    console.log(videoTrack);
+    console.log(peer[0].id, mediaStream);
     try {
-      localPeer.call(peer[0].id, videoTrack)
+      localPeer.call(peer[0].id, mediaStream)
     } catch (e) {
       console.log(e);
     }
@@ -301,5 +301,3 @@ function lockRoom(roomname) {
     .then(res => e => console.log(res))
     .catch(e => console.log(e));
 }
-
-
