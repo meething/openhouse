@@ -63,6 +63,7 @@ app.post("/rooms", (req, res) => {
     title: req.body.title,
     peers: []
   };
+  gunRooms.get(room.id).set(room);
   rooms[room.id] = room;
   res.json(room);
 });

@@ -203,7 +203,7 @@ function mediaAnalyze() {
     var source = audioCtx.createMediaStreamSource(audio);
     source.connect(analyzer);
     // analyzer.connect(audioCtx.destination);
-    analyzer.fftSize = 128;
+    analyzer.fftSize = 64;
 
     var frequencyData = new Uint8Array(analyzer.frequencyBinCount);
 
@@ -214,10 +214,15 @@ function mediaAnalyze() {
       document.getElementById("bins").appendChild(e);
       bins.push(e);
     });
+    var half = false;
     function renderFrame() {
+      half = !half; if (half) {
+        requestAnimationFrame(renderFrame);
+        return;
+      }
       analyzer.getByteFrequencyData(frequencyData);
       frequencyData.forEach(function(data, index) {
-        bins[index].style.height = (data * 100) / 256 + "%";
+        bins[index].style.height = (data * 50) / 256 + "%";
       });
       requestAnimationFrame(renderFrame);
     }
@@ -231,13 +236,15 @@ function lockRoom(roomname) {
   lock = lock ? false : true;
   lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
   console.log('switch lock!',lock,roomname);
+  // TODO Block New Participants
+  // TODO Update Room object for hiding
   fetch(window.location.protocol + "rooms", {
     method: "POST",
     cache: "no-cache",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       title: roomname,
-      locked: lock
+      locked: true
     })
   })
     .then(res => e => console.log(res))
