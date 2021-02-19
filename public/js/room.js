@@ -10,7 +10,7 @@ const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
 const screenButton = document.getElementById("screen-button");
 
-console.log('gun room setup',ROOM_ID);
+console.log('gun room setup',ROOM_ID); //where is ROOM_ID from?
 var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], musticast: false, localStorage: false, radisk: false, file: false});
 var gunRooms = gun.get('rooms'); 
 var gunRoom = gunRooms.get(ROOM_ID);
@@ -21,7 +21,7 @@ gunRoom.on(function(data, key){
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   console.log('pushing to gun',localPeerId);
-  gunRoom.put({ name: "User", id: localPeerId });
+  gunRoom.put({ name: "Latest User", id: localPeerId }); //we could do gunRoom.get(localPeerId).put({name:"User", id: localPeerId})
   
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
@@ -43,8 +43,8 @@ localPeer.on("open", localPeerId => {
     socket.on("peer-toggled-mute", onPeerToggleMute);
     socket.emit("join-room", ROOM_ID, localPeerId);
     addLocalProfile();
-    toggleMute();
     notifyMe("Joined! Unmute to speak");
+    toggleMute();
     mediaAnalyze();
   });
 });
@@ -91,7 +91,7 @@ function onPeerToggleMute(peerId, isMuted) {
     var muteElem = document.getElementById(peerId + "-peer-mute");
     muteElem.style.opacity = isMuted ? 1 : 0;
   } catch (e) {
-    console.error(e);
+    console.log(e);
   }
 }
 
