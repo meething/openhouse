@@ -15,7 +15,7 @@ var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], musticas
 var gunRooms = gun.get('rooms'); 
 var gunRoom = gunRooms.get(ROOM_ID);
 gunRoom.on(function(data, key){
-  console.log("gun update:", data);
+  console.log("gun update:", data, key);
 });
 
 localPeer.on("open", localPeerId => {
