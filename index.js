@@ -76,7 +76,6 @@ app.get("*", function(req, res) {
 });
 
 // TODO: CONVERT TO MEETHING STYLE!
-
 io.on("connection", socket => {
   socket.on("join-room", (roomId, peerId) => {
     if (rooms[roomId]) rooms[roomId].peers.push(peerId);
