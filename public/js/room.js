@@ -8,6 +8,7 @@ const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
 const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
+const screenButton = document.getElementById("screen-button");
 
 
 localPeer.on("open", localPeerId => {
@@ -203,6 +204,8 @@ function notifyMe(msg) {
 var sharingScreen = false;
 
 async function shareScreen (ev) {
+  // Flip the switch
+  screenButton.innerHTML = sharingScreen ? "Share Screen" : "Stop Sharing";
   // Get reference to video element
   let videoElement = document.getElementById('shareview');
   // if we are already sharing, stop the sharing.
