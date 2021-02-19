@@ -1,6 +1,8 @@
 var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], musticast: false, localStorage: false, radisk: false, file: false});
-var gunRooms = (await gun.get('rooms').promOnce()).data; 
-console.log(gun)
+
+var gunRooms;
+gun.get('rooms').promOnce().then((obj)=>{gunRooms = obj.data;console.log(obj);});
+
 
 function joinRoom(e) {
   e.preventDefault();

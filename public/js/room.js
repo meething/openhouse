@@ -21,7 +21,7 @@ gunRoom.on(function(data, key){
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   console.log('pushing to gun',localPeerId);
-  gunRoom.put({ name: "Latest User", id: localPeerId }); //we could do gunRoom.get(localPeerId).put({name:"User", id: localPeerId})
+  gunRoom.put({ name: "Latest User", id: localPeerId });
   
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
