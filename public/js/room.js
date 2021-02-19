@@ -23,6 +23,10 @@ localPeer.on("open", localPeerId => {
       localStream.getAudioTracks()[0].enabled = true;
       onToggleMute();
     };
+    localPeer.on("screenshare", function(peer,call){
+      notifyMe(peer + " is sharing screen");
+      let videoElement = document.getElementById('shareview');
+    });
     localPeer.on("call", call => {
       call.answer(localStream);
       call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
