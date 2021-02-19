@@ -1,3 +1,6 @@
+var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], musticast: false, localStorage: false, radisk: false, file: false});
+var gunRooms = gun.get('rooms'); 
+
 function joinRoom(e) {
   e.preventDefault();
   window.location.href = "/r/" + e.target.name;

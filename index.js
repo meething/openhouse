@@ -72,7 +72,7 @@ app.post("/rooms", (req, res) => {
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms });
+  res.render("rooms", { rooms, gunRooms });
   //res.render("404");
 });
 
