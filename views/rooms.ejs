@@ -6,6 +6,7 @@
     <script src="/js/rooms.js" defer></script>
     <link href="/css/style.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/lib/promise.js"></script>
 
   </head>
   <body>
@@ -24,9 +25,9 @@
 
         <% } %>
       </div>
-      <div>
-        <%= Object.values(gunRooms).length  %>
-      </div>
+     <div>
+        <%= gunRooms %>
+    </div>
       
       
     </div>

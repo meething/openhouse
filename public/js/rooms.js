@@ -1,5 +1,6 @@
 var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], musticast: false, localStorage: false, radisk: false, file: false});
-var gunRooms = gun.get('rooms'); 
+var gunRooms = (await gun.get('rooms').promOnce()).data; 
+console.log(gun)
 
 function joinRoom(e) {
   e.preventDefault();
@@ -9,7 +10,7 @@ function joinRoom(e) {
 function startRoom() {
   var roomname = prompt("Please enter your room name", uuidv4());
   // currently set by API/server side
-  // var room = gunRooms.get(roomname).set({ title: roomname, id: roomname, peers: {}, locked: false });
+  //var room = gunRooms.get(roomname).set({ title: roomname, id: roomname, peers: {}, locked: false });
   fetch(window.location.protocol + "rooms", {
     method: "POST",
     cache: "no-cache",

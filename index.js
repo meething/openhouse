@@ -9,8 +9,8 @@ var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], multicas
 
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
-
 var gunRooms = gun.get('rooms');
+
 var rooms = {
   lobby: {
     id: "lobby",
@@ -38,8 +38,8 @@ app.use(bodyParser.json({ type: "application/json" }));
 
 // ROUTES
 
-app.get("/", (req, res) => {
-  res.render("rooms", { rooms });
+app.get("/", async (req, res) => {
+  res.render("rooms", { rooms, gunRooms });
 });
 
 app.get("/r/:id", (req, res) => {
@@ -72,7 +72,7 @@ app.post("/rooms", (req, res) => {
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms, gunRooms });
+  res.render("rooms", { rooms });
   //res.render("404");
 });
 
