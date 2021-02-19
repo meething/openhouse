@@ -44,7 +44,7 @@ app.get("/", async (req, res) => {
 
 app.get("/r/:id", (req, res) => {
   if (!rooms[req.params.id]) {
-    res.render("rooms", { rooms });
+    res.render("rooms", { rooms, gunRooms });
     //res.render("404");
     return;
   }
@@ -64,7 +64,14 @@ app.post("/rooms", (req, res) => {
     peers: [],
     locked: req.body.locked
   };
-  gunRooms.get(room.id).put(room);
+  var gunRoom = {
+    id: uuidv4(),
+    title: req.body.title,
+    peers: {},
+    locked: req.body.locked
+  };
+  gunRooms.get(room.id).put(gunRoom);
+  
   rooms[room.id] = room;
   res.json(room);
 });
@@ -72,7 +79,7 @@ app.post("/rooms", (req, res) => {
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms });
+  res.render("rooms", { rooms, gunRooms });
   //res.render("404");
 });
 

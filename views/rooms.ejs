@@ -26,10 +26,10 @@
         <% } %>
       </div>
      <div>
-        <% for (var i = 0; i < Object.values(gunRooms).length; i++) { %>
-          <%if (!Object.values(gunRooms)[i].locked) { %>
+        <% for (var i = 0; i < Object.values(gunRooms.data).length; i++) { %>
+          <%if (!Object.values(gunRooms.data)[i].locked) { %>
             <button onClick="joinRoom(event)" class="w-full px-6 py-4 mb-2 bg-gray-200 hover:bg-gray-300 rounded-md font-medium" name="<%= Object.values(rooms)[i].id %>">
-              <%= Object.values(gunRooms)[i].title %>
+              <%= i %>
             </button>
           <% } %>
 
