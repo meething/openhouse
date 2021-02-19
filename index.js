@@ -61,7 +61,8 @@ app.post("/rooms", (req, res) => {
   var room = {
     id: uuidv4(),
     title: req.body.title,
-    peers: []
+    peers: [],
+    locked: req.body.locked
   };
   gunRooms.get(room.id).set(room);
   rooms[room.id] = room;
