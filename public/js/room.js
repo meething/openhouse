@@ -10,8 +10,11 @@ const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
 const screenButton = document.getElementById("screen-button");
 
+var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse_"+ROOM_ID], musticast: false, localStorage: false, radisk: false, file: false});
+  
 
 localPeer.on("open", localPeerId => {
+  // store localPeerId to Gun Room
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
     localStream = s;
