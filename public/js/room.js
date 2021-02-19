@@ -23,11 +23,6 @@ localPeer.on("open", localPeerId => {
       localStream.getAudioTracks()[0].enabled = true;
       onToggleMute();
     };
-    localPeer.on("screenshare", function(peer,call){
-      notifyMe(peer + " is sharing screen");
-      console.log('screensharing by ' ,peer);
-      let videoElement = document.getElementById('shareview');
-    });
     localPeer.on("call", call => {
       call.answer(localStream);
       call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
@@ -241,9 +236,9 @@ async function shareScreen (ev) {
 
 async function sendScreenToAll (mediaStream) {
   localPeer._connections.forEach((peer, i) => {
-    console.log('sharing to',peer[0].id, mediaStream);
+    console.log('sharing to',peer, mediaStream);
     try {
-      localPeer.call(peer[0].id, mediaStream)
+      localPeer.call(peer[0].id, mediaStream);
     } catch (e) {
       console.log(e);
     }
