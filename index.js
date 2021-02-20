@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const server = require("http").Server(app);
 
+// Shared GUN scope for ROOM management only (no signaling here)
 var Gun = require("gun");
 require("gun/lib/promise.js");
 var gun = Gun({
@@ -31,6 +32,7 @@ var rooms = {
   }
 };
 
+// GUN Rooms object
 var gunRooms = gun.get('rooms');
 
 app.set("view engine", "ejs");
@@ -42,17 +44,18 @@ app.use(bodyParser.json({ type: "application/json" }));
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
-  res.render("rooms", { rooms, gunRooms });
+  res.render("rooms", { rooms });
 });
 
 app.get("/r/:id", (req, res) => {
   if (!rooms[req.params.id]) {
-    res.render("rooms", { rooms, gunRooms });
+    res.render("rooms", { rooms: rooms });
     //res.render("404");
     return;
   }
   res.render("room", {
     room: rooms[req.params.id],
+    gunRooms: gunRooms,
     peerjs: {}
   });
 });
@@ -73,7 +76,7 @@ app.post("/rooms", (req, res) => {
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms, gunRooms });
+  res.render("rooms", { rooms });
   //res.render("404");
 });
 
