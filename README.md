@@ -9,9 +9,11 @@ _decentralized audio chatrooms without government_
 
 [![openshouse](https://user-images.githubusercontent.com/1423657/107402868-bffcf780-6b04-11eb-947e-6798ebaaad65.png)](https://openhouse-meething.glitch.me)
 
-powered by [GUN](https://gun.eco) and [MeeThing](https://meething.space)
+#### Credits
+- powered by [GUN](https://gun.eco) and [MeeThing](https://meething.space)
+- UI baseline by [nickgarfield](https://github.com/nickgarfield)
 
-#### Design Notes
-- p2p audio only _(no video by design)_
+##### Design Notes
+- p2p audio only + screensharing _(no video by design)_
+- uses GUN/Meething bootstrap signaling _(no data!)_ and room states
 - not for large groups _(yet)_
-- uses GUN/Meething bootstrap signaling _(no data!)_
