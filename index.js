@@ -6,8 +6,6 @@ const io = require("socket.io")(server);
 var Gun = require('gun');
 require('gun/lib/promise.js');
 var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], multicast: false, localStorage: false, radisk: false, file: false});
-var gunRooms = gun.get('rooms');
-console.log('gunRooms?',gunRooms);
 
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
@@ -32,6 +30,10 @@ var rooms = {
     locked: false
   }
 };
+
+gun.get('rooms').put(rooms);
+var gunRooms = gun.get('rooms').promOnce().then((obj)=>{gunRooms = obj.data;console.log(obj);});
+
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
