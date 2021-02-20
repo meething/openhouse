@@ -1,4 +1,3 @@
-const socket = io("/");
 var remotePeers = {};
 var remoteUsers = {};
 var localStream = null;
@@ -6,7 +5,6 @@ const localPeer = new Peer();
 var localId;
 var lock = false;
 
-// Use DAM instead of socket.io
 var dam = true;
 
 var username = prompt(
@@ -33,7 +31,7 @@ var gun = Gun({
 var gunRooms = gun.get("rooms");
 // GUN ROOM Scope (alternative channel)
 var gunRoom = gunRooms.get(ROOM_ID);
-// SPAMMY. Returns the last value. Needs TS > now()
+// BACKUP CHANNEL. Returns the last value. Needs TS > now()
 //gunRoom.on(function(data, key) {
 //  console.log("gun update:", data, key);
 //});
@@ -49,7 +47,11 @@ localPeer.on("open", localPeerId => {
   // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
-  sendSignaling({type: 'peer-joined-room', peerId: localPeerId, username: username });
+  sendSignaling({
+    type: "peer-joined-room",
+    peerId: localPeerId,
+    username: username
+  });
 
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
@@ -67,14 +69,6 @@ localPeer.on("open", localPeerId => {
       call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
     });
 
-    // TODO: Replace socket events with DAM Events
-    if (!dam){
-      socket.on("peer-joined-room", peerId => onPeerJoined(peerId, localStream));
-      socket.on("peer-left-room", onPeerLeft);
-      socket.on("peer-toggled-mute", onPeerToggleMute);
-      socket.emit("join-room", ROOM_ID, localPeerId);
-    }
-    
     // JOIN-ROOM Trigger seems no longer needed?
     //sendSignaling({ type: "join-room", peerId: localPeerId, roomId: ROOM_ID, username: username });
 
@@ -106,11 +100,7 @@ function onPeerLeft(remotePeerId) {
 
 function leaveRoom(e) {
   e.preventDefault();
-  if (dam){
-    sendSignaling({ type: "peer-left-room", peerId: localId });
-  } else {
-    socket.disconnect(); 
-  }
+  sendSignaling({ type: "peer-left-room", peerId: localId });
   window.location.href = "/";
 }
 
@@ -131,17 +121,12 @@ function onToggleMute() {
   muteButton.classList.toggle("bg-gray-300");
   var muteElem = document.getElementById("local-peer-mute");
   muteElem.style.opacity = isMuted ? 1 : 0;
-  if (dam){
-    sendSignaling({
-      type: "peer-toggle-mute",
-      peerId: localPeer.id,
-      isMuted: isMuted
-    });
-    //sendLog(localPeer+' mute swap');  
-  }else{
-    socket.emit("toggle-mute", localPeer.id, isMuted);
-  }
-  
+  sendSignaling({
+    type: "peer-toggle-mute",
+    peerId: localPeer.id,
+    isMuted: isMuted
+  });
+  //sendLog(localPeer+' mute swap');
 }
 
 function onPeerToggleMute(peerId, isMuted) {
@@ -183,7 +168,9 @@ function addLocalProfile() {
 function addPeerProfile(call, stream) {
   var peerName = document.createElement("span");
   peerName.className = "peer-name";
-  peerName.appendChild(document.createTextNode( remoteUsers[call.peer] || call.peer.substring(0, 4)));
+  peerName.appendChild(
+    document.createTextNode(remoteUsers[call.peer] || call.peer.substring(0, 4))
+  );
 
   var audioElem = document.createElement("audio");
   audioElem.srcObject = stream;
@@ -463,24 +450,23 @@ async function loadDam(id) {
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
             // TRIGGER FOR peer-joined-room! do nothing or use for username pairing only
-            if (dam) onPeerJoined(msg.signaling.peerId, localStream)
-            break;  
+            onPeerJoined(msg.signaling.peerId, localStream);
+            break;
           case "peer-joined-room":
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
-            if (dam) onPeerJoined(data.peerId, localStream)
+            onPeerJoined(data.peerId, localStream);
             break;
           case "peer-left-room":
             console.log(data.type, data);
-            delete(remoteUsers[data.peerId]);
-            if (dam) onPeerLeft(data.peerId)
+            delete remoteUsers[data.peerId];
+            onPeerLeft(data.peerId);
             break;
           case "peer-toggle-mute":
             console.log(data.type, data);
-            if (dam) onPeerToggleMute(data.peerId, data.isMuted)
+            onPeerToggleMute(data.peerId, data.isMuted);
             break;
         }
-
       }
       if (msg.image) {
         const { image } = msg.image;
