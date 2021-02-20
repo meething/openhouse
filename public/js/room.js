@@ -2,6 +2,7 @@ const socket = io("/");
 var remotePeers = {};
 var localStream = null;
 const localPeer = new Peer();
+var localId;
 var lock = false;
 
 var username = prompt("Please enter your username name", 'Anonymous'+Math.floor(Math.random() * (999 - 111 + 1) ) + 111 );
@@ -33,8 +34,7 @@ var gunRoom = gunRooms.get(ROOM_ID);
 // Join GUN Room Mesh/DAM using a named scope
 loadDam(ROOM_ID);
 
-// Stash our local peer id
-var localId;
+
 
 // Handle LocalPeer Events
 localPeer.on("open", localPeerId => {
@@ -44,6 +44,7 @@ localPeer.on("open", localPeerId => {
   // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
+  sendSignaling({type: 'peer-joined-room', peerId: localPeerId});
   
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
@@ -431,13 +432,24 @@ async function loadDam(id) {
       }
       if (msg.signaling) {
         // Switch Call States
-        /*    socket.on("peer-joined-room", peerId => onPeerJoined(peerId, localStream));
-              socket.on("peer-left-room", onPeerLeft);
-              socket.on("peer-toggled-mute", onPeerToggleMute);
-        */
-        if (msg.signaling.type == 'peer-joined-room'){
-          
-        }
+        var type = msg.signaling.type || 'null';
+          switch(msg.signaling.type){
+            case 'peer-joined-room':
+              console.log('got',type);
+              //onPeerJoined(msg.signaling.peerId, localStream)
+              break;
+            case 'peer-left-room':
+              console.log('got',type);
+              //onPeerLeft
+              break;
+            case 'peer-toggled-mute':
+              console.log('got',type);
+              //onPeerToggleMute
+              break;
+            default:
+              console.log('got nothing.')
+              break;
+          }
         const { data } = msg.signaling;
         console.log("got x-signaling!");
         console.log(data);
