@@ -440,31 +440,27 @@ async function loadDam(id) {
       }
       if (msg.signaling) {
         // Switch Call States
-        var type = msg.signaling.type || "null";
-        switch (msg.signaling.type) {
+        const { data } = msg.signaling;
+        console.log("got x-signaling!");
+        switch (data.type) {
           case "join-room":
-            console.log("got", type);
+            console.log("got", data);
             //onPeerJoined(msg.signaling.peerId, localStream)
             break;  
           case "peer-joined-room":
-            console.log("got", type);
+            console.log("got", data);
             //onPeerJoined(msg.signaling.peerId, localStream)
             break;
           case "peer-left-room":
-            console.log("got", type);
+            console.log("got", data);
             //onPeerLeft
             break;
-          case "peer-toggled-mute":
-            console.log("got", type);
+          case "peer-toggle-mute":
+            console.log("got", data);
             //onPeerToggleMute
             break;
-          case *:
-            console.log("got nothing.");
-            break;
         }
-        const { data } = msg.signaling;
-        console.log("got x-signaling!");
-        console.log(data);
+
       }
       if (msg.image) {
         const { image } = msg.image;
