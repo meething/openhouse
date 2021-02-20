@@ -97,6 +97,7 @@ function onToggleMute() {
   var muteElem = document.getElementById("local-peer-mute");
   muteElem.style.opacity = isMuted ? 1 : 0;
   socket.emit("toggle-mute", localPeer.id, isMuted);
+  sendLog(localPeer+' mute swap');
 }
 
 function onPeerToggleMute(peerId, isMuted) {
