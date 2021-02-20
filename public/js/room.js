@@ -10,23 +10,30 @@ const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
 const screenButton = document.getElementById("screen-button");
 
-var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], musticast: false, localStorage: false, radisk: false, file: false});
-var gunRooms = gun.get('rooms'); 
+var gun = Gun({
+  peers: ["https://gundb-multiserver.glitch.me/openhouse"],
+  musticast: false,
+  localStorage: false,
+  radisk: false,
+  file: false
+});
+var gunRooms = gun.get("rooms");
 var gunRoom = gunRooms.get(ROOM_ID);
-gunRoom.on(function(data, key){
+gunRoom.on(function(data, key) {
   console.log("gun update:", data, key);
 });
 
+// Join Room Mesh/DAM
+loadDam(ROOM_ID);
 
 var localId;
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
-  console.log('pushing to gun',localPeerId);
+  console.log("pushing to gun", localPeerId);
   gunRoom.put({ name: "peer-joined-room", id: localPeerId });
+  sendLog("peer joined damn! Id: " + localPeerId);
   localId = localPeerId;
-  loadDam(localPeerId);
-  sendLog('peer joined damn! Id: '+localPeerId);
-  
+
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
     localStream = s;
@@ -54,13 +61,14 @@ localPeer.on("open", localPeerId => {
 });
 
 function onPeerJoined(remotePeerId, localStream) {
-  sendSignaling('damn i see '+remotePeerId);
+  sendLog("damn i see remote peer joined " + remotePeerId);
   const call = localPeer.call(remotePeerId, localStream);
   call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
   notifyMe("joined " + remotePeerId);
 }
 
 function onPeerLeft(remotePeerId) {
+  sendLog("damn i see remote peer left " + remotePeerId);
   if (remotePeers[remotePeerId]) remotePeers[remotePeerId].close();
   notifyMe("left " + remotePeerId);
 }
@@ -219,30 +227,30 @@ function notifyMe(msg) {
 
 var sharingScreen = false;
 
-async function shareScreen (ev) {
+async function shareScreen(ev) {
   // Flip the switch
   screenButton.innerHTML = sharingScreen ? "Share Screen" : "Stop Sharing";
   // Get reference to video element
-  let videoElement = document.getElementById('shareview');
+  let videoElement = document.getElementById("shareview");
   // if we are already sharing, stop the sharing.
-  if(sharingScreen) {
+  if (sharingScreen) {
     let tracks = videoElement.srcObject.getTracks();
     tracks.forEach(track => track.stop());
     videoElement.srcObject = null;
     sharingScreen = false;
     return;
-   }
+  }
   // user asked to share their screen
   let sharedScreenStream = null;
   // create config object
-  let config = {video:{cursor:'always'}, audio:false};
+  let config = { video: { cursor: "always" }, audio: false };
   try {
     sharedScreenStream = await navigator.mediaDevices.getDisplayMedia(config);
     sharingScreen = true;
     // pass shared screen to function to add track to sending
-    sendScreenToAll(sharedScreenStream)
+    sendScreenToAll(sharedScreenStream);
   } catch (e) {
-    console.log('screencapture issue: ', e);
+    console.log("screencapture issue: ", e);
   }
   // set shared screen so we can see we are sharing something
   videoElement.srcObject = sharedScreenStream;
@@ -250,9 +258,9 @@ async function shareScreen (ev) {
   return;
 }
 
-async function sendScreenToAll (mediaStream) {
+async function sendScreenToAll(mediaStream) {
   localPeer._connections.forEach((peer, i) => {
-    console.log('sharing to',peer, mediaStream);
+    console.log("sharing to", peer, mediaStream);
     try {
       localPeer.call(peer[0].id, mediaStream);
     } catch (e) {
@@ -260,7 +268,6 @@ async function sendScreenToAll (mediaStream) {
     }
   });
 }
-
 
 /* End Screen Sharing Code */
 
@@ -286,7 +293,8 @@ function mediaAnalyze() {
     });
     var half = false;
     function renderFrame() {
-      half = !half; if (half) {
+      half = !half;
+      if (half) {
         requestAnimationFrame(renderFrame);
         return;
       }
@@ -305,7 +313,7 @@ function mediaAnalyze() {
 function lockRoom(roomname) {
   lock = lock ? false : true;
   lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
-  console.log('switch lock!',lock,roomname);
+  console.log("switch lock!", lock, roomname);
   // TODO Block New Participants
   // TODO Update Room object for hiding
   fetch(window.location.protocol + "rooms", {
@@ -322,120 +330,131 @@ function lockRoom(roomname) {
 }
 
 async function getICEServers() {
-        var servers = [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun.sipgate.net:3478' }
-           // { urls:  `stun:${location.hostname}:80`}
-        ];
-        console.log('self stun',servers);
-        return servers;
+  var servers = [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun.sipgate.net:3478" }
+    // { urls:  `stun:${location.hostname}:80`}
+  ];
+  console.log("self stun", servers);
+  return servers;
 }
 
-/* DAMNROOM! */
+/* DAMNROOM! EXPERIMENTAL PART BELOW */
+
+// Exported Functions for MESHing
 let sendLog = () => {};
 let sendFrame = () => {};
 let sendSignaling = () => {};
 
 async function loadDam(id) {
-        console.log('bootstrapping dam with id',id)
-        const user = id || ROOM_ID;
-        const data = {
-            [user]: { x: 0, y: 0, user: user },
+  console.log("bootstrapping dam with id", id);
+  const user = id || ROOM_ID;
+  const data = {
+    [user]: { x: 0, y: 0, user: user }
+  };
+
+  try {
+    var streaming = false;
+    var canvas = document.getElementById("canvas");
+  } catch (e) {
+    console.log(e);
+  }
+
+  var root = Gun({
+    peers: ["https://gundb-multiserver.glitch.me/openhouse_" + ROOM_ID],
+    rtc: { iceServers: await getICEServers() },
+    multicast: false,
+    localStorage: false,
+    radisk: false,
+    file: false
+  });
+
+  if (localStorage.getItem("dam")) {
+    // does this ever work?
+    const dam = root.back("opt.mesh");
+    console.log("Localstorage DAM");
+    dam.hear.signaling = (msg, peer) => {
+      const { name, message } = msg;
+      // do something with peerjs
+    };
+    dam.hear.log = (msg, peer) => {
+      const { name, log } = msg;
+      console.log(log, name);
+      // do something with peerjs
+    };
+    dam.hear.image = (msg, peer) => {
+      const { image } = msg;
+      console.log("got image!");
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0);
+    };
+
+    sendFrame = image => {
+      console.log("sending frame!");
+      dam.say({ dam: "image", image });
+    };
+    sendLog = log => {
+      dam.say({ dam: "log", name: user, log });
+    };
+    sendSignaling = data => {
+      dam.say({ dam: "signaling", name: user, data });
+    };
+  } else {
+    console.log("Root DAM");
+    root.on("in", function(msg) {
+      if (msg.log) {
+        const { log } = msg.log;
+        console.log("got x-log!");
+        console.log(log);
+      }
+      if (msg.signaling) {
+        const { data } = msg.signaling;
+        console.log("got x-signaling!");
+        console.log(data);
+      }
+      if (msg.image) {
+        const { image } = msg.image;
+        console.log("got x-image!");
+        var canvas = document.getElementById("canvas");
+        var img = new Image();
+        img.src = image;
+        img.onload = function() {
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
         };
-      
-        try {
-           var streaming = false;
-           var canvas = document.getElementById('canvas');
-          
-        } catch(e){
-          console.log(e)
-        }
-      
-        var root = Gun({
-          peers:["https://gundb-multiserver.glitch.me/openhouse_"+ROOM_ID], 
-          rtc: { iceServers: await getICEServers() }, 
-          multicast: false, localStorage: false, radisk: false, file: false
-        });
+      }
+      this.to.next(msg);
+    });
+    sendLog = log => {
+      //console.log("trying to send log", log);
+      const id = Math.random()
+        .toString()
+        .slice(2);
+      root.on("out", { "#": id, log: { name: user, log } });
+    };
+    sendSignaling = data => {
+      //console.log("trying to send signaling", data);
+      const id = Math.random()
+        .toString()
+        .slice(2);
+      root.on("out", { "#": id, signaling: { name: user, data } });
+    };
+    sendFrame = image => {
+      console.log("sending frame!");
+      const id = Math.random()
+        .toString()
+        .slice(2);
+      root.on("out", { "#": id, image: { image } });
+    };
+  }
 
-        if (localStorage.getItem('dam')) {
-            // does this ever work?
-            const dam = root.back('opt.mesh');
-            console.log('Localstorage DAM');
-            dam.hear.signaling = (msg, peer) => {
-                const { name, message } = msg;
-                // do something with peerjs
-            };
-            dam.hear.log = (msg, peer) => {
-                const { name, log } = msg;
-                console.log(log,name)
-                // do something with peerjs
-            };
-            dam.hear.image = (msg, peer) => {
-                const { image } = msg;
-                console.log('got image!');
-                var canvas = document.getElementById('canvas');
-                var ctx = canvas.getContext('2d');
-                ctx.drawImage(image, 0,0);
-            };
-            
-            sendFrame = (image) => {
-                console.log('sending frame!')
-                dam.say({ dam: 'image', image })
-            }
-            sendLog = (log) => {
-                dam.say({ dam: 'log', name: user, log});
-            };
-            sendSignaling = (data) => {
-                dam.say({ dam: 'signaling', name: user, data});
-            };
-        } else {
-            console.log('Root DAM');
-            root.on('in', function (msg) {
-                if (msg.log) {
-                    const { log } = msg.log;
-                    console.log(log);
-                }
-                if (msg.signaling) {
-                    const { data } = msg.signaling;
-                    console.log(data);
-                }
-                if (msg.image) {
-                    const { image } = msg.image;
-                    console.log('got x-image!');
-                    var canvas = document.getElementById('canvas');
-                    var img=new Image();
-                    img.src=image;
-                    img.onload = function(){
-                      var ctx = canvas.getContext('2d');
-                      ctx.drawImage(img,0,0);
-                    }
-                }
-                this.to.next(msg);
-            });
-            sendLog = (log) => {
-                console.log('trying to send log',log);
-                const id = Math.random().toString().slice(2);
-                root.on( 'out', { '#': id, log: { name: user, log }});
-            };
-            sendSignaling = (data) => {
-                console.log('trying to send signaling',data);
-                const id = Math.random().toString().slice(2);
-                root.on( 'out', { '#': id, signaling: { name: user, data }});
-            };
-            sendFrame = (image) => {
-                console.log('sending frame!')
-                const id = Math.random().toString().slice(2);
-                root.on( 'out', { '#': id, image: { image}});
-            }
-        }
-
-        function updateData(name, x, y) {
-            if (!data[name]) {
-                console.log('unknown party!', name)
-            } else {
-                data[name].x = x;
-                data[name].y = y;
-            }
-        }
-
+  function updateData(name, x, y) {
+    if (!data[name]) {
+      console.log("unknown party!", name);
+    } else {
+      data[name].x = x;
+      data[name].y = y;
+    }
+  }
 }
