@@ -9,7 +9,7 @@ _decentralized audio chatrooms without government_
 
 powered by [GUN](https://gun.eco) and [MeeThing](https://meething.space)
 
-### Design
+#### Design Notes
 - p2p audio only _(no video by design)_
 - not for large groups _(yet)_
 - uses GUN/Meething bootstrap signaling _(no data!)_
