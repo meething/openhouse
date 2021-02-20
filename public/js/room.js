@@ -433,6 +433,8 @@ async function loadDam(id) {
             delete remoteUsers[data.peerId];
             onPeerLeft(data.peerId);
             gunRoom.get('peers').get(data.peerId).put(null);
+            var count = gunRoom.get('peers').length;
+            console.log('room state',count)
             break;
           case "peer-toggle-mute":
             console.log(data.type, data);
