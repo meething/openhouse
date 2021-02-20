@@ -40,10 +40,10 @@ var localId;
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   localId = localPeerId;
-  console.log("pushing self to DAMN", localPeerId);
+  console.log("pushing self to DAMN", ROOM_ID, localPeerId);
   // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
   // notify DAM network, we joined!
-  sendLog("peer joined DAMN! Id: " + localPeerId);
+  sendLog(username + " joined DAMN! PeerId: " + localPeerId);
   
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
@@ -68,7 +68,7 @@ localPeer.on("open", localPeerId => {
     socket.emit("join-room", ROOM_ID, localPeerId);
 
     addLocalProfile();
-    notifyMe("Joined! Unmute to speak");
+    // notifyMe("Joined! Unmute to speak");
     toggleMute();
     mediaAnalyze();
   });
@@ -122,7 +122,7 @@ function onToggleMute() {
 function onPeerToggleMute(peerId, isMuted) {
   try {
     var muteElem = document.getElementById(peerId + "-peer-mute");
-    muteElem.style.opacity = isMuted ? 1 : 0;
+    if (muteElem) muteElem.style.opacity = isMuted ? 1 : 0;
   } catch (e) {
     console.log(e, peerId, muteElem);
   }
@@ -448,27 +448,26 @@ async function loadDam(id) {
     });
     sendLog = log => {
       //console.log("trying to send log", log);
-      const id = Math.random()
-        .toString()
-        .slice(2);
+      const id = randId();
       root.on("out", { "#": id, log: { name: user, log } });
     };
     sendSignaling = data => {
       //console.log("trying to send signaling", data);
-      const id = Math.random()
-        .toString()
-        .slice(2);
+      const id = randId();
       root.on("out", { "#": id, signaling: { name: user, data } });
     };
     sendFrame = image => {
       console.log("sending frame!");
-      const id = Math.random()
-        .toString()
-        .slice(2);
+      const id = randId();
       root.on("out", { "#": id, image: { image } });
     };
   }
 
+  function randId(){
+    return Math.random()
+        .toString()
+        .slice(2);
+  }
   function updateData(name, x, y) {
     if (!data[name]) {
       console.log("unknown party!", name);
