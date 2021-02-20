@@ -12,6 +12,7 @@ const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
 const screenButton = document.getElementById("screen-button");
 
+// Connect to multisocket for ROOMS only! DAM uses different scope
 var gun = Gun({
   peers: ["https://gundb-multiserver.glitch.me/openhouse"],
   musticast: false,
@@ -19,25 +20,30 @@ var gun = Gun({
   radisk: false,
   file: false
 });
-var gunRooms = gun.get("rooms");
-var gunRoom = gunRooms.get(ROOM_ID);
-gunRoom.on(function(data, key) {
-  console.log("gun update:", data, key);
-});
 
-// Join Room Mesh/DAM
+// GUN ROOMS List + Peer Counters
+var gunRooms = gun.get("rooms");
+// GUN ROOM Scope (alternative channel)
+var gunRoom = gunRooms.get(ROOM_ID);
+// SPAMMY. Returns the last value. Needs TS > now()
+//gunRoom.on(function(data, key) {
+//  console.log("gun update:", data, key);
+//});
+
+// Join GUN Room Mesh/DAM using a named scope
 loadDam(ROOM_ID);
 
-// Our local peer id
+// Stash our local peer id
 var localId;
 
+// Handle LocalPeer Events
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   localId = localPeerId;
-  console.log("pushing self to gun", localPeerId);
+  console.log("pushing self to DAMN", localPeerId);
   // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
-  // notify network, we joined!
-  sendLog("peer joined damn! Id: " + localPeerId);
+  // notify DAM network, we joined!
+  sendLog("peer joined DAMN! Id: " + localPeerId);
   
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
@@ -54,10 +60,13 @@ localPeer.on("open", localPeerId => {
       call.answer(localStream);
       call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
     });
+    
+    // TODO: Replace socket events with DAM Events
     socket.on("peer-joined-room", peerId => onPeerJoined(peerId, localStream));
     socket.on("peer-left-room", onPeerLeft);
     socket.on("peer-toggled-mute", onPeerToggleMute);
     socket.emit("join-room", ROOM_ID, localPeerId);
+
     addLocalProfile();
     notifyMe("Joined! Unmute to speak");
     toggleMute();
@@ -76,7 +85,10 @@ function onPeerJoined(remotePeerId, localStream) {
 function onPeerLeft(remotePeerId) {
   if (remotePeerId == localId) return;
   console.log("damn i see remote peer left " + remotePeerId);
-  if (remotePeers[remotePeerId]) remotePeers[remotePeerId].close();
+  if (remotePeers[remotePeerId]) {
+    remotePeers[remotePeerId].close();
+    remotePeers[remotePeerId] = null;
+  } 
   notifyMe("left " + remotePeerId);
 }
 
