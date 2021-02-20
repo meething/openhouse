@@ -1,5 +1,6 @@
 const socket = io("/");
 var remotePeers = {};
+var remoteUsers = {};
 var localStream = null;
 const localPeer = new Peer();
 var localId;
@@ -45,7 +46,7 @@ localPeer.on("open", localPeerId => {
   // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
-  //sendSignaling({type: 'peer-joined-room', peerId: localPeerId});
+  sendSignaling({type: 'peer-joined-room', peerId: localPeerId});
 
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
@@ -68,7 +69,7 @@ localPeer.on("open", localPeerId => {
     socket.on("peer-left-room", onPeerLeft);
     socket.on("peer-toggled-mute", onPeerToggleMute);
     socket.emit("join-room", ROOM_ID, localPeerId);
-    sendSignaling({ type: "join-room", peerId: localPeerId, roomId: ROOM_ID });
+    sendSignaling({ type: "join-room", peerId: localPeerId, roomId: ROOM_ID, username: username });
 
     // Display Local Profile & automute (rcvonly here?)
     addLocalProfile();
@@ -124,7 +125,7 @@ function onToggleMute() {
   sendSignaling({
     type: "peer-toggle-mute",
     peerId: localPeer.id,
-    muted: isMuted
+    isMuted: isMuted
   });
   //sendLog(localPeer+' mute swap');
 }
@@ -168,7 +169,7 @@ function addLocalProfile() {
 function addPeerProfile(call, stream) {
   var peerName = document.createElement("span");
   peerName.className = "peer-name";
-  peerName.appendChild(document.createTextNode(call.peer.substring(0, 4)));
+  peerName.appendChild(document.createTextNode( remoteUsers[call.peer] || call.peer.substring(0, 4)));
 
   var audioElem = document.createElement("audio");
   audioElem.srcObject = stream;
@@ -441,23 +442,26 @@ async function loadDam(id) {
       if (msg.signaling) {
         // Switch Call States
         const { data } = msg.signaling;
-        console.log("got x-signaling!");
+        console.log("got x-signaling!", data.type);
         switch (data.type) {
           case "join-room":
-            console.log("got", data);
+            console.log(data.type, data);
+            remoteUsers[data.peerId] = data.username;
+            // TRIGGER FOR peer-joined-room! do nothing or use for username pairing only
             //onPeerJoined(msg.signaling.peerId, localStream)
             break;  
           case "peer-joined-room":
-            console.log("got", data);
-            //onPeerJoined(msg.signaling.peerId, localStream)
+            console.log(data.type, data);
+            //onPeerJoined(data.peerId, localStream)
             break;
           case "peer-left-room":
-            console.log("got", data);
-            //onPeerLeft
+            console.log(data.type, data);
+            delete(remoteUsers[data.peerId]);
+            //onPeerLeft(data.peerId)
             break;
           case "peer-toggle-mute":
-            console.log("got", data);
-            //onPeerToggleMute
+            console.log(data.type, data);
+            //onPeerToggleMute(data.peerId, data.isMuted)
             break;
         }
 
