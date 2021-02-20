@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadGame(id) {
-        const user = id || elFormName.value;
+        const user = id || ROOM_ID;
         const data = {
             [user]: { x: 0, y: 0, el: createPoint(user) },
         };
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         function schedule() {
             requestAnimationFrame(() => {
-                render();
+                //render();
                 schedule();
             });
         }
