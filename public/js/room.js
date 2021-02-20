@@ -31,6 +31,7 @@ var gun = Gun({
 var gunRooms = gun.get("rooms");
 // GUN ROOM Scope (alternative channel)
 var gunRoom = gunRooms.get(ROOM_ID);
+gunRoom.get('name').put(ROOM_ID)
 // BACKUP CHANNEL. Returns the last value. Needs TS > now()
 //gunRoom.on(function(data, key) {
 //  console.log("gun update:", data, key);
@@ -450,7 +451,8 @@ async function loadDam(id) {
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
             // TRIGGER FOR peer-joined-room! do nothing or use for username pairing only
-            onPeerJoined(msg.signaling.peerId, localStream);
+            onPeerJoined(data.peerId, localStream);
+            gunRoom.get('peers').get(data.peerId).put(msg.signaling);
             break;
           case "peer-joined-room":
             console.log(data.type, data);
@@ -461,6 +463,7 @@ async function loadDam(id) {
             console.log(data.type, data);
             delete remoteUsers[data.peerId];
             onPeerLeft(data.peerId);
+            gunRoom.get('peers').get(data.peerId).put(null);
             break;
           case "peer-toggle-mute":
             console.log(data.type, data);
