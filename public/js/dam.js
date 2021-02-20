@@ -4,19 +4,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const elFormName = document.getElementById('form-user-name');
     const elPageGame = document.getElementById('call');
 
+    /*
     elFormUser.addEventListener('submit', e => {
         e.preventDefault();
         console.log('gun room setup',ROOM_ID); //where is ROOM_ID from?
-        gotoGame();
+        //gotoGame();
         loadGame();
-        e.
     });
 
     function gotoGame() {
         elPageUser.style.display = 'none';
         elPageGame.style.display = 'block';
     }
-
+    */
+  
+    loadGame();
+  
     async function getICEServers() {
         var servers = [
             { urls: 'stun:stun.l.google.com:19302' },
@@ -150,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data[user].y = e.y;
             //console.log('sending mouse',e.x,e.y);
             sendPosition(e.x, e.y);
-            return false;
+            return true;
         });
     }
 });

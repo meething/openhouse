@@ -17,10 +17,13 @@ gunRoom.on(function(data, key){
   console.log("gun update:", data, key);
 });
 
+var localId;
+
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   console.log('pushing to gun',localPeerId);
   gunRoom.put({ name: "peer-joined-room", id: localPeerId });
+  localId = localPeerId;
   
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
