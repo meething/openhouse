@@ -15,5 +15,5 @@ _decentralized audio chatrooms without government_
 
 ##### Design Notes
 - p2p audio only + screensharing _(no video by design)_
-- uses GUN/Meething bootstrap signaling _(no data!)_ and room states
-- not for large groups _(yet)_
+- uses **GUN/Meething** bootstrap signaling _(no data!)_ and room state
+- not for large groups _(yet!)_
