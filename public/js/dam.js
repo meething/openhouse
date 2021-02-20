@@ -6,8 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     elFormUser.addEventListener('submit', e => {
         e.preventDefault();
+        console.log('gun room setup',ROOM_ID); //where is ROOM_ID from?
         gotoGame();
         loadGame();
+        e.
     });
 
     function gotoGame() {
@@ -40,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       
         var root = Gun({
-          peers:["https://gundb-multiserver.glitch.me/openhouse"], 
+          peers:["https://gundb-multiserver.glitch.me/openhouse_"+ROOM_ID], 
           rtc: { iceServers: await getICEServers() }, 
           multicast: false, localStorage: false, radisk: false, file: false
         });
@@ -48,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let sendPosition = () => {};
         let sendFrame = () => {};
+        let sendSignaling = () => {};
 
         if (localStorage.getItem('dam')) {
             const dam = root.back('opt.mesh');
@@ -55,7 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { name, x, y } = msg;
                 updateData(name, x, y);
             };
-             dam.hear.Image = (msg, peer) => {
+            dam.hear.signaling = (msg, peer) => {
+                const { name, message } = msg;
+                // do something with peerjs
+            };
+            dam.hear.Image = (msg, peer) => {
                 const { image } = msg;
                 console.log('got image!');
                 var canvas = document.getElementById('canvas');
@@ -69,6 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('sending frame!')
                 dam.say({ dam: 'Image', image })
             }
+            sendSignaling = (message) => {
+                dam.say({ dam: 'Signaling', name: user, message});
+            };
         } else {
             root.on('in', function (msg) {
                 if (msg.cgx) {
@@ -140,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data[user].y = e.y;
             //console.log('sending mouse',e.x,e.y);
             sendPosition(e.x, e.y);
+            return false;
         });
     }
 });
