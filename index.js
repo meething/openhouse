@@ -31,6 +31,8 @@ var rooms = {
   }
 };
 
+var gunRooms = gun.get('rooms');
+
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json({ type: "application/json" }));
@@ -40,7 +42,7 @@ app.use(bodyParser.json({ type: "application/json" }));
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
-  res.render("rooms", { rooms });
+  res.render("rooms", { rooms, gunRooms });
 });
 
 app.get("/r/:id", (req, res) => {
@@ -71,7 +73,7 @@ app.post("/rooms", (req, res) => {
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms });
+  res.render("rooms", { rooms, gunRooms });
   //res.render("404");
 });
 
