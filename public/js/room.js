@@ -22,7 +22,8 @@ localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   console.log('pushing to gun',localPeerId);
   gunRoom.put({ name: "peer-joined-room", id: localPeerId });
-
+  loadDam(localPeerId);
+  
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
     localStream = s;
@@ -50,6 +51,7 @@ localPeer.on("open", localPeerId => {
 });
 
 function onPeerJoined(remotePeerId, localStream) {
+  sendSignaling('damn i see '+remotePeerId);
   const call = localPeer.call(remotePeerId, localStream);
   call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
   notifyMe("joined " + remotePeerId);
@@ -91,7 +93,7 @@ function onPeerToggleMute(peerId, isMuted) {
     var muteElem = document.getElementById(peerId + "-peer-mute");
     muteElem.style.opacity = isMuted ? 1 : 0;
   } catch (e) {
-    console.log(e);
+    console.log(e, peerId, muteElem);
   }
 }
 
@@ -327,11 +329,14 @@ async function getICEServers() {
 }
 
 /* DAMNROOM! */
-var send;
-async function loadGame(id) {
+let sendLog = () => {};
+let sendFrame = () => {};
+let sendSignaling = () => {};
+
+async function loadDam(id) {
         const user = id || ROOM_ID;
         const data = {
-            [user]: { x: 0, y: 0, el: createPoint(user) },
+            [user]: { x: 0, y: 0, name: id },
         };
       
         try {
@@ -348,6 +353,7 @@ async function loadGame(id) {
           multicast: false, localStorage: false, radisk: false, file: false
         });
 
+        let sendLog = () => {};
         let sendFrame = () => {};
         let sendSignaling = () => {};
 
@@ -365,10 +371,7 @@ async function loadGame(id) {
                 var ctx = canvas.getContext('2d');
                 ctx.drawImage(image, 0,0);
             };
-            sendLog = (log) => {
-                const id = Math.random().toString().slice(2);
-                root.on( 'out', { '#': id, log: { name: user, log }});
-            };
+            
             sendFrame = (image) => {
                 console.log('sending frame!')
                 dam.say({ dam: 'Image', image })
@@ -378,8 +381,8 @@ async function loadGame(id) {
             };
         } else {
             root.on('in', function (msg) {
-                if (msg.cgx) {
-                    const { log } = msg.cgx;
+                if (msg.log) {
+                    const { log } = msg.log;
                     console.log(log);
                 }
                 if (msg.image) {
@@ -395,6 +398,11 @@ async function loadGame(id) {
                 }
                 this.to.next(msg);
             });
+            sendLog = (log) => {
+                console.log('trying to send log',log);
+                const id = Math.random().toString().slice(2);
+                root.on( 'out', { '#': id, log: { name: user, log }});
+            };
             sendFrame = (image) => {
                 console.log('sending frame!')
                 const id = Math.random().toString().slice(2);
