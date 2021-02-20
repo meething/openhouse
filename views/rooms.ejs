@@ -7,6 +7,21 @@
     <link href="/css/style.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/lib/promise.js"></script>
+    <script>
+      // Shared GUN scope for ROOM management only (no signaling here)
+      var Gun = require("gun");
+      require("gun/lib/promise.js");
+      var gun = Gun({
+        peers: ["https://gundb-multiserver.glitch.me/openhouse"],
+        multicast: false,
+        localStorage: false,
+        radisk: false,
+        file: false
+      });
+
+      / GUN Rooms object
+      var gunRooms = gun.get('rooms');
+    </script>
 
   </head>
   <body>

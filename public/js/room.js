@@ -402,38 +402,7 @@ async function loadDam(id) {
     file: false
   });
 
-  if (localStorage.getItem("dam")) {
-    // does this ever work?
-    const dam = root.back("opt.mesh");
-    console.log("Localstorage DAM");
-    dam.hear.signaling = (msg, peer) => {
-      const { name, message } = msg;
-      // do something with peerjs
-    };
-    dam.hear.log = (msg, peer) => {
-      const { name, log } = msg;
-      console.log(log, name);
-      // do something with peerjs
-    };
-    dam.hear.image = (msg, peer) => {
-      const { image } = msg;
-      console.log("got image!");
-      var canvas = document.getElementById("canvas");
-      var ctx = canvas.getContext("2d");
-      ctx.drawImage(image, 0, 0);
-    };
-
-    sendFrame = image => {
-      console.log("sending frame!");
-      dam.say({ dam: "image", image });
-    };
-    sendLog = log => {
-      dam.say({ dam: "log", name: user, log });
-    };
-    sendSignaling = data => {
-      dam.say({ dam: "signaling", name: user, data });
-    };
-  } else {
+  
     console.log("Root DAM");
     root.on("in", function(msg) {
       if (msg.log) {
@@ -499,7 +468,7 @@ async function loadDam(id) {
       const id = randId();
       root.on("out", { "#": id, image: { image } });
     };
-  }
+  
 
   function randId() {
     return Math.random()

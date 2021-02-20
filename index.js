@@ -13,6 +13,9 @@ var gun = Gun({
   file: false
 });
 
+// GUN Rooms object
+var gunRooms = gun.get('rooms');
+
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
 
@@ -32,8 +35,7 @@ var rooms = {
   }
 };
 
-// GUN Rooms object
-var gunRooms = gun.get('rooms');
+/
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
@@ -44,7 +46,7 @@ app.use(bodyParser.json({ type: "application/json" }));
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
-  res.render("rooms", { rooms });
+  res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
 });
 
 app.get("/r/:id", (req, res) => {
