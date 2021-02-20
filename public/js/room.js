@@ -435,8 +435,7 @@ async function loadDam(id) {
             // cleanup
             gunRoom.get('peers').get(data.peerId).put(null);
             var count = gunRoom.get('peers').length;
-            if (count < 1) gunRoom = null;
-            console.log('room state',count)
+            sendLog('room state count '+count);
             break;
           case "peer-toggle-mute":
             console.log(data.type, data);
