@@ -6,6 +6,9 @@ const localPeer = new Peer();
 var localId;
 var lock = false;
 
+// Use DAM instead of socket.io
+var dam = true;
+
 var username = prompt(
   "Please enter your username name",
   "Anonymous" + Math.floor(Math.random() * (999 - 111 + 1)) + 111
@@ -65,10 +68,14 @@ localPeer.on("open", localPeerId => {
     });
 
     // TODO: Replace socket events with DAM Events
-    socket.on("peer-joined-room", peerId => onPeerJoined(peerId, localStream));
-    socket.on("peer-left-room", onPeerLeft);
-    socket.on("peer-toggled-mute", onPeerToggleMute);
-    socket.emit("join-room", ROOM_ID, localPeerId);
+    if (!dam){
+      socket.on("peer-joined-room", peerId => onPeerJoined(peerId, localStream));
+      socket.on("peer-left-room", onPeerLeft);
+      socket.on("peer-toggled-mute", onPeerToggleMute);
+      socket.emit("join-room", ROOM_ID, localPeerId);
+    }
+    
+    // JOIN-ROOM Trigger seems no longer needed?
     //sendSignaling({ type: "join-room", peerId: localPeerId, roomId: ROOM_ID, username: username });
 
     // Display Local Profile & automute (rcvonly here?)
@@ -99,8 +106,11 @@ function onPeerLeft(remotePeerId) {
 
 function leaveRoom(e) {
   e.preventDefault();
-  sendSignaling({ type: "peer-left-room", peerId: localId });
-  socket.disconnect();
+  if (dam){
+    sendSignaling({ type: "peer-left-room", peerId: localId });
+  } else {
+    socket.disconnect(); 
+  }
   window.location.href = "/";
 }
 
@@ -121,13 +131,17 @@ function onToggleMute() {
   muteButton.classList.toggle("bg-gray-300");
   var muteElem = document.getElementById("local-peer-mute");
   muteElem.style.opacity = isMuted ? 1 : 0;
-  socket.emit("toggle-mute", localPeer.id, isMuted);
-  sendSignaling({
-    type: "peer-toggle-mute",
-    peerId: localPeer.id,
-    isMuted: isMuted
-  });
-  //sendLog(localPeer+' mute swap');
+  if (dam){
+    sendSignaling({
+      type: "peer-toggle-mute",
+      peerId: localPeer.id,
+      isMuted: isMuted
+    });
+    //sendLog(localPeer+' mute swap');  
+  }else{
+    socket.emit("toggle-mute", localPeer.id, isMuted);
+  }
+  
 }
 
 function onPeerToggleMute(peerId, isMuted) {
@@ -449,20 +463,21 @@ async function loadDam(id) {
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
             // TRIGGER FOR peer-joined-room! do nothing or use for username pairing only
-            //onPeerJoined(msg.signaling.peerId, localStream)
+            if (dam) onPeerJoined(msg.signaling.peerId, localStream)
             break;  
           case "peer-joined-room":
             console.log(data.type, data);
-            //onPeerJoined(data.peerId, localStream)
+            remoteUsers[data.peerId] = data.username;
+            if (dam) onPeerJoined(data.peerId, localStream)
             break;
           case "peer-left-room":
             console.log(data.type, data);
             delete(remoteUsers[data.peerId]);
-            //onPeerLeft(data.peerId)
+            if (dam) onPeerLeft(data.peerId)
             break;
           case "peer-toggle-mute":
             console.log(data.type, data);
-            //onPeerToggleMute(data.peerId, data.isMuted)
+            if (dam) onPeerToggleMute(data.peerId, data.isMuted)
             break;
         }
 
