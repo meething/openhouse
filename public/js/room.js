@@ -46,7 +46,7 @@ localPeer.on("open", localPeerId => {
   // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
-  sendSignaling({type: 'peer-joined-room', peerId: localPeerId});
+  sendSignaling({type: 'peer-joined-room', peerId: localPeerId, username: username });
 
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
@@ -69,7 +69,7 @@ localPeer.on("open", localPeerId => {
     socket.on("peer-left-room", onPeerLeft);
     socket.on("peer-toggled-mute", onPeerToggleMute);
     socket.emit("join-room", ROOM_ID, localPeerId);
-    sendSignaling({ type: "join-room", peerId: localPeerId, roomId: ROOM_ID, username: username });
+    //sendSignaling({ type: "join-room", peerId: localPeerId, roomId: ROOM_ID, username: username });
 
     // Display Local Profile & automute (rcvonly here?)
     addLocalProfile();
@@ -442,6 +442,7 @@ async function loadDam(id) {
       if (msg.signaling) {
         // Switch Call States
         const { data } = msg.signaling;
+        if (data.peerId && data.peerId == localId) return;
         console.log("got x-signaling!", data.type);
         switch (data.type) {
           case "join-room":
