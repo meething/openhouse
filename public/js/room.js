@@ -5,7 +5,10 @@ const localPeer = new Peer();
 var localId;
 var lock = false;
 
-var username = prompt("Please enter your username name", 'Anonymous'+Math.floor(Math.random() * (999 - 111 + 1) ) + 111 );
+var username = prompt(
+  "Please enter your username name",
+  "Anonymous" + Math.floor(Math.random() * (999 - 111 + 1)) + 111
+);
 
 const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
@@ -34,8 +37,6 @@ var gunRoom = gunRooms.get(ROOM_ID);
 // Join GUN Room Mesh/DAM using a named scope
 loadDam(ROOM_ID);
 
-
-
 // Handle LocalPeer Events
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
@@ -44,8 +45,8 @@ localPeer.on("open", localPeerId => {
   // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
-  sendSignaling({type: 'peer-joined-room', peerId: localPeerId});
-  
+  //sendSignaling({type: 'peer-joined-room', peerId: localPeerId});
+
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
     localStream = s;
@@ -61,18 +62,19 @@ localPeer.on("open", localPeerId => {
       call.answer(localStream);
       call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
     });
-    
+
     // TODO: Replace socket events with DAM Events
     socket.on("peer-joined-room", peerId => onPeerJoined(peerId, localStream));
     socket.on("peer-left-room", onPeerLeft);
     socket.on("peer-toggled-mute", onPeerToggleMute);
     socket.emit("join-room", ROOM_ID, localPeerId);
+    sendSignaling({ type: "join-room", peerId: localPeerId, roomId: ROOM_ID });
 
     // Display Local Profile & automute (rcvonly here?)
     addLocalProfile();
     toggleMute();
     notifyMe("Room Joined! Unmute to speak");
-    mediaAnalyze();
+    //mediaAnalyze();
   });
 });
 
@@ -90,12 +92,13 @@ function onPeerLeft(remotePeerId) {
   if (remotePeers[remotePeerId]) {
     remotePeers[remotePeerId].close();
     remotePeers[remotePeerId] = null;
-  } 
+  }
   notifyMe("left " + remotePeerId);
 }
 
 function leaveRoom(e) {
   e.preventDefault();
+  sendSignaling({ type: "peer-left-room", peerId: localId });
   socket.disconnect();
   window.location.href = "/";
 }
@@ -118,7 +121,12 @@ function onToggleMute() {
   var muteElem = document.getElementById("local-peer-mute");
   muteElem.style.opacity = isMuted ? 1 : 0;
   socket.emit("toggle-mute", localPeer.id, isMuted);
-  sendLog(localPeer+' mute swap');
+  sendSignaling({
+    type: "peer-toggle-mute",
+    peerId: localPeer.id,
+    muted: isMuted
+  });
+  //sendLog(localPeer+' mute swap');
 }
 
 function onPeerToggleMute(peerId, isMuted) {
@@ -432,24 +440,28 @@ async function loadDam(id) {
       }
       if (msg.signaling) {
         // Switch Call States
-        var type = msg.signaling.type || 'null';
-          switch(msg.signaling.type){
-            case 'peer-joined-room':
-              console.log('got',type);
-              //onPeerJoined(msg.signaling.peerId, localStream)
-              break;
-            case 'peer-left-room':
-              console.log('got',type);
-              //onPeerLeft
-              break;
-            case 'peer-toggled-mute':
-              console.log('got',type);
-              //onPeerToggleMute
-              break;
-            default:
-              console.log('got nothing.')
-              break;
-          }
+        var type = msg.signaling.type || "null";
+        switch (msg.signaling.type) {
+          case "join-room":
+            console.log("got", type);
+            //onPeerJoined(msg.signaling.peerId, localStream)
+            break;  
+          case "peer-joined-room":
+            console.log("got", type);
+            //onPeerJoined(msg.signaling.peerId, localStream)
+            break;
+          case "peer-left-room":
+            console.log("got", type);
+            //onPeerLeft
+            break;
+          case "peer-toggled-mute":
+            console.log("got", type);
+            //onPeerToggleMute
+            break;
+          case *:
+            console.log("got nothing.");
+            break;
+        }
         const { data } = msg.signaling;
         console.log("got x-signaling!");
         console.log(data);
@@ -484,10 +496,10 @@ async function loadDam(id) {
     };
   }
 
-  function randId(){
+  function randId() {
     return Math.random()
-        .toString()
-        .slice(2);
+      .toString()
+      .slice(2);
   }
   function updateData(name, x, y) {
     if (!data[name]) {
