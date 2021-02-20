@@ -15,6 +15,20 @@ var gun = Gun({
 
 // GUN Rooms object
 var gunRooms = gun.get('rooms');
+gunRooms.put({
+  lobby: {
+    id: "lobby",
+    title: "Lobby",
+    peers: {},
+    locked: false
+  },
+  meething: {
+    id: "meething",
+    title: "Meething",
+    peers: {},
+    locked: false
+  }
+});
 
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
@@ -35,8 +49,6 @@ var rooms = {
   }
 };
 
-/
-
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json({ type: "application/json" }));
@@ -51,7 +63,7 @@ app.get("/", async (req, res) => {
 
 app.get("/r/:id", (req, res) => {
   if (!rooms[req.params.id]) {
-    res.render("rooms", { rooms: rooms });
+    res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
     //res.render("404");
     return;
   }
@@ -78,7 +90,7 @@ app.post("/rooms", (req, res) => {
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms });
+  res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
   //res.render("404");
 });
 
