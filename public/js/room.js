@@ -67,9 +67,10 @@ localPeer.on("open", localPeerId => {
     socket.on("peer-toggled-mute", onPeerToggleMute);
     socket.emit("join-room", ROOM_ID, localPeerId);
 
+    // Display Local Profile & automute (rcvonly here?)
     addLocalProfile();
-    // notifyMe("Joined! Unmute to speak");
     toggleMute();
+    notifyMe("Room Joined! Unmute to speak");
     mediaAnalyze();
   });
 });
@@ -429,6 +430,14 @@ async function loadDam(id) {
         console.log(log);
       }
       if (msg.signaling) {
+        // Switch Call States
+        /*    socket.on("peer-joined-room", peerId => onPeerJoined(peerId, localStream));
+              socket.on("peer-left-room", onPeerLeft);
+              socket.on("peer-toggled-mute", onPeerToggleMute);
+        */
+        if (msg.signaling.type == 'peer-joined-room'){
+          
+        }
         const { data } = msg.signaling;
         console.log("got x-signaling!");
         console.log(data);
