@@ -31,10 +31,6 @@ var rooms = {
   }
 };
 
-gun.get('rooms').put(rooms);
-var gunRooms = gun.get('rooms').promOnce().then((obj)=>{gunRooms = obj.data;console.log(obj);});
-
-
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json({ type: "application/json" }));
@@ -54,7 +50,6 @@ app.get("/r/:id", (req, res) => {
     return;
   }
   res.render("room", {
-    gunRoom: gunRooms.get(req.params.id),
     room: rooms[req.params.id],
     peerjs: {}
   });
