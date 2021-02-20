@@ -4,6 +4,8 @@ var localStream = null;
 const localPeer = new Peer();
 var lock = false;
 
+var username = prompt("Please enter your username name", 'Anonymous'+Math.floor(Math.random() * (999 - 111 + 1) ) + 111 );
+
 const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
 const shareButton = document.getElementById("share-button");
@@ -26,14 +28,17 @@ gunRoom.on(function(data, key) {
 // Join Room Mesh/DAM
 loadDam(ROOM_ID);
 
+// Our local peer id
 var localId;
+
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
-  console.log("pushing to gun", localPeerId);
-  gunRoom.put({ name: "peer-joined-room", id: localPeerId });
-  sendLog("peer joined damn! Id: " + localPeerId);
   localId = localPeerId;
-
+  console.log("pushing self to gun", localPeerId);
+  // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
+  // notify network, we joined!
+  sendLog("peer joined damn! Id: " + localPeerId);
+  
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
     localStream = s;
@@ -61,14 +66,16 @@ localPeer.on("open", localPeerId => {
 });
 
 function onPeerJoined(remotePeerId, localStream) {
-  sendLog("damn i see remote peer joined " + remotePeerId);
+  if (remotePeerId == localId) return;
+  console.log("damn i see remote peer joined " + remotePeerId);
   const call = localPeer.call(remotePeerId, localStream);
   call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
   notifyMe("joined " + remotePeerId);
 }
 
 function onPeerLeft(remotePeerId) {
-  sendLog("damn i see remote peer left " + remotePeerId);
+  if (remotePeerId == localId) return;
+  console.log("damn i see remote peer left " + remotePeerId);
   if (remotePeers[remotePeerId]) remotePeers[remotePeerId].close();
   notifyMe("left " + remotePeerId);
 }

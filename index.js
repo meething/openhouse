@@ -10,6 +10,7 @@ var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], multicas
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
 
+var env = {};
 var rooms = {
   lobby: {
     id: "lobby",
