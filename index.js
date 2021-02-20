@@ -1,9 +1,21 @@
 const express = require("express");
 const app = express();
 const server = require("http").Server(app);
-const io = require("socket.io")(server);
+
+var Gun = require("gun");
+require("gun/lib/promise.js");
+var gun = Gun({
+  peers: ["https://gundb-multiserver.glitch.me/openhouse"],
+  multicast: false,
+  localStorage: false,
+  radisk: false,
+  file: false
+});
+
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
+
+var env = {};
 var rooms = {
   lobby: {
     id: "lobby",
@@ -25,7 +37,9 @@ app.use(bodyParser.json({ type: "application/json" }));
 
 // ROUTES
 
-app.get("/", (req, res) => {
+app.use("/favicon.ico", express.static("favicon.ico"));
+
+app.get("/", async (req, res) => {
   res.render("rooms", { rooms });
 });
 
@@ -47,7 +61,8 @@ app.post("/rooms", (req, res) => {
   var room = {
     id: uuidv4(),
     title: req.body.title,
-    peers: []
+    peers: [],
+    locked: req.body.locked
   };
   rooms[room.id] = room;
   res.json(room);
@@ -58,27 +73,6 @@ app.post("/rooms", (req, res) => {
 app.get("*", function(req, res) {
   res.render("rooms", { rooms });
   //res.render("404");
-});
-
-// TODO: CONVERT TO MEETHING STYLE!
-io.on("connection", socket => {
-  socket.on("join-room", (roomId, peerId) => {
-    if (rooms[roomId]) rooms[roomId].peers.push(peerId);
-    else rooms[roomId] = { title: null, peers: [peerId] };
-    socket.join(roomId);
-    socket.to(roomId).broadcast.emit("peer-joined-room", peerId);
-    socket.on("toggle-mute", (peerId, isMuted) =>
-      socket.to(roomId).broadcast.emit("peer-toggled-mute", peerId, isMuted)
-    );
-    socket.on("disconnect", () => {
-      rooms[roomId].peers = rooms[roomId].peers.filter(i => i !== peerId);
-      if (rooms[roomId].peers.length < 1 && roomId != "lobby") {
-        delete rooms[roomId];
-        return;
-      }
-      socket.to(roomId).broadcast.emit("peer-left-room", peerId);
-    });
-  });
 });
 
 server.listen(process.env.PORT || 3000);

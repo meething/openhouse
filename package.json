@@ -1,6 +1,6 @@
 {
   "name": "openhouse",
-  "version": "0.0.1",
+  "version": "1.0.5",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,15 +8,25 @@
     "start": "node index.js",
     "build:css": "npx tailwindcss build ./public/css/source.css -o ./public/css/style.css"
   },
+  "engines": {
+    "node": ">=14"
+  },
+  "browser": {
+    "hyperswarm": "hyperswarm-web"
+  },
   "license": "MIT",
   "dependencies": {
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "peerjs": "^1.3.1",
-    "socket.io": "^2.3.0",
     "tailwindcss": "^1.7.3",
     "uuid": "^8.3.2",
-    "body-parser": "^1.19.0"
+    "body-parser": "^1.19.0",
+    "hyperswarm-web": "^2.1.1",
+    "crypto": "^1.0.1",
+    "hyperswarm": "^2.15.3",
+    "duplexify": "^4.1.1",
+    "gun": "^0.2020.520"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"
