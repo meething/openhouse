@@ -123,13 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function createPoint(name) {
-            const point = document.createElement('div');
-            point.className = 'point';
-            const text = document.createElement('span');
-            text.className = 'point-text';
-            text.innerText = name;
-            point.appendChild(text);
-            elPageGame.appendChild(point);
+            var point = document.getElementById(name);
             return point;
         }
 

@@ -17,14 +17,12 @@ gunRoom.on(function(data, key){
   console.log("gun update:", data, key);
 });
 
-var localId;
 
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   console.log('pushing to gun',localPeerId);
   gunRoom.put({ name: "peer-joined-room", id: localPeerId });
-  localId = localPeerId;
-  
+
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
     localStream = s;
@@ -316,4 +314,101 @@ function lockRoom(roomname) {
   })
     .then(res => e => console.log(res))
     .catch(e => console.log(e));
+}
+
+async function getICEServers() {
+        var servers = [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun.sipgate.net:3478' }
+           // { urls:  `stun:${location.hostname}:80`}
+        ];
+        console.log('self stun',servers);
+        return servers;
+}
+
+/* DAMNROOM! */
+var send;
+async function loadGame(id) {
+        const user = id || ROOM_ID;
+        const data = {
+            [user]: { x: 0, y: 0, el: createPoint(user) },
+        };
+      
+        try {
+           var streaming = false;
+           var canvas = document.getElementById('canvas');
+          
+        } catch(e){
+          console.log(e)
+        }
+      
+        var root = Gun({
+          peers:["https://gundb-multiserver.glitch.me/openhouse_"+ROOM_ID], 
+          rtc: { iceServers: await getICEServers() }, 
+          multicast: false, localStorage: false, radisk: false, file: false
+        });
+
+        let sendFrame = () => {};
+        let sendSignaling = () => {};
+
+        if (localStorage.getItem('dam')) {
+            const dam = root.back('opt.mesh');
+
+            dam.hear.Signaling = (msg, peer) => {
+                const { name, message } = msg;
+                // do something with peerjs
+            };
+            dam.hear.Image = (msg, peer) => {
+                const { image } = msg;
+                console.log('got image!');
+                var canvas = document.getElementById('canvas');
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(image, 0,0);
+            };
+            sendLog = (log) => {
+                const id = Math.random().toString().slice(2);
+                root.on( 'out', { '#': id, log: { name: user, log }});
+            };
+            sendFrame = (image) => {
+                console.log('sending frame!')
+                dam.say({ dam: 'Image', image })
+            }
+            sendSignaling = (message) => {
+                dam.say({ dam: 'Signaling', name: user, message});
+            };
+        } else {
+            root.on('in', function (msg) {
+                if (msg.cgx) {
+                    const { log } = msg.cgx;
+                    console.log(log);
+                }
+                if (msg.image) {
+                    const { image } = msg.image;
+                    console.log('got x-image!');
+                    var canvas = document.getElementById('canvas');
+                    var img=new Image();
+                    img.src=image;
+                    img.onload = function(){
+                      var ctx = canvas.getContext('2d');
+                      ctx.drawImage(img,0,0);
+                    }
+                }
+                this.to.next(msg);
+            });
+            sendFrame = (image) => {
+                console.log('sending frame!')
+                const id = Math.random().toString().slice(2);
+                root.on( 'out', { '#': id, image: { image}});
+            }
+        }
+
+        function updateData(name, x, y) {
+            if (!data[name]) {
+                console.log('unknown party!', name)
+            } else {
+                data[name].x = x;
+                data[name].y = y;
+            }
+        }
+
 }
