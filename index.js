@@ -37,15 +37,15 @@ app.use(bodyParser.json({ type: "application/json" }));
 
 // ROUTES
 
+app.use('/favicon.ico', express.static('favicon.ico'));
+
 app.get("/", async (req, res) => {
-  var gunRooms = gun.get('rooms').promOnce();
-  console.log('gunRooms',gunRooms);
-  res.render("rooms", { rooms, gunRooms });
+  res.render("rooms", { rooms });
 });
 
 app.get("/r/:id", (req, res) => {
   if (!rooms[req.params.id]) {
-    res.render("rooms", { rooms, gunRooms });
+    res.render("rooms", { rooms });
     //res.render("404");
     return;
   }
@@ -70,7 +70,6 @@ app.post("/rooms", (req, res) => {
     peers: {},
     locked: req.body.locked
   };
-  gunRooms.get(room.id).put(gunRoom);
   
   rooms[room.id] = room;
   res.json(room);
@@ -79,7 +78,7 @@ app.post("/rooms", (req, res) => {
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms, gunRooms });
+  res.render("rooms", { rooms });
   //res.render("404");
 });
 
