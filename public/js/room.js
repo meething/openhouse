@@ -11,6 +11,7 @@ const lockButton = document.getElementById("lock-button");
 const screenButton = document.getElementById("screen-button");
 
 console.log('gun room setup',ROOM_ID); //where is ROOM_ID from?
+loadGame(ROOM_ID);
 var gun = Gun({peers:["https://gundb-multiserver.glitch.me/openhouse"], musticast: false, localStorage: false, radisk: false, file: false});
 var gunRooms = gun.get('rooms'); 
 var gunRoom = gunRooms.get(ROOM_ID);

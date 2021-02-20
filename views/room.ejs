@@ -14,13 +14,20 @@
     <script src="https://cdn.jsdelivr.net/npm/gun/lib/promise.js"></script>
 
     <script src="/js/room.js" defer></script>
+    <script src="/js/dam.js" defer></script>
     <link href="/css/style.css" rel="stylesheet">
     <link href= "/css/room.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
     <div id="bins">
     </div>
-    <div class="flex flex-col min-h-screen box-border px-10 py-5 my-0 mx-auto max-w-4xl">
+     <div class="page" id="page-user">
+        <form id="form-user">
+            <label>Username:</label>
+            <input id="form-user-name" type="text" autofocus />
+        </form>
+    </div>
+    <div id="call" style="display: none;" class="flex flex-col min-h-screen box-border px-10 py-5 my-0 mx-auto max-w-4xl">
       <div class="flex flex-row">
         <button id="leave-button" onClick="leaveRoom(event)" style="margin-left: 0em" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full">Leave</button>
         <button id="share-button" onClick="shareUrl()" style="margin-left: 0.5em" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-full">Link</button>
