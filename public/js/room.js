@@ -18,11 +18,14 @@ gunRoom.on(function(data, key){
 });
 
 
+var localId;
 localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   console.log('pushing to gun',localPeerId);
   gunRoom.put({ name: "peer-joined-room", id: localPeerId });
+  localId = localPeerId;
   loadDam(localPeerId);
+  sendLog('peer joined damn! Id: '+localPeerId);
   
   const opt = { video: false, audio: true };
   navigator.mediaDevices.getUserMedia(opt).then(s => {
@@ -334,9 +337,10 @@ let sendFrame = () => {};
 let sendSignaling = () => {};
 
 async function loadDam(id) {
+        console.log('bootstrapping dam with id',id)
         const user = id || ROOM_ID;
         const data = {
-            [user]: { x: 0, y: 0, name: id },
+            [user]: { x: 0, y: 0, user: user },
         };
       
         try {
@@ -353,18 +357,20 @@ async function loadDam(id) {
           multicast: false, localStorage: false, radisk: false, file: false
         });
 
-        let sendLog = () => {};
-        let sendFrame = () => {};
-        let sendSignaling = () => {};
-
         if (localStorage.getItem('dam')) {
+            // does this ever work?
             const dam = root.back('opt.mesh');
-
-            dam.hear.Signaling = (msg, peer) => {
+            console.log('Localstorage DAM');
+            dam.hear.signaling = (msg, peer) => {
                 const { name, message } = msg;
                 // do something with peerjs
             };
-            dam.hear.Image = (msg, peer) => {
+            dam.hear.log = (msg, peer) => {
+                const { name, log } = msg;
+                console.log(log,name)
+                // do something with peerjs
+            };
+            dam.hear.image = (msg, peer) => {
                 const { image } = msg;
                 console.log('got image!');
                 var canvas = document.getElementById('canvas');
@@ -374,16 +380,24 @@ async function loadDam(id) {
             
             sendFrame = (image) => {
                 console.log('sending frame!')
-                dam.say({ dam: 'Image', image })
+                dam.say({ dam: 'image', image })
             }
-            sendSignaling = (message) => {
-                dam.say({ dam: 'Signaling', name: user, message});
+            sendLog = (log) => {
+                dam.say({ dam: 'log', name: user, log});
+            };
+            sendSignaling = (data) => {
+                dam.say({ dam: 'signaling', name: user, data});
             };
         } else {
+            console.log('Root DAM');
             root.on('in', function (msg) {
                 if (msg.log) {
                     const { log } = msg.log;
                     console.log(log);
+                }
+                if (msg.signaling) {
+                    const { data } = msg.signaling;
+                    console.log(data);
                 }
                 if (msg.image) {
                     const { image } = msg.image;
@@ -402,6 +416,11 @@ async function loadDam(id) {
                 console.log('trying to send log',log);
                 const id = Math.random().toString().slice(2);
                 root.on( 'out', { '#': id, log: { name: user, log }});
+            };
+            sendSignaling = (data) => {
+                console.log('trying to send signaling',data);
+                const id = Math.random().toString().slice(2);
+                root.on( 'out', { '#': id, signaling: { name: user, data }});
             };
             sendFrame = (image) => {
                 console.log('sending frame!')
