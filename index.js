@@ -64,7 +64,6 @@ app.get("/r/:id", (req, res) => {
   }
   res.render("room", {
     room: rooms[req.params.id],
-    gunRooms: gunRooms,
     peerjs: {}
   });
 });
@@ -78,7 +77,7 @@ app.post("/rooms", (req, res) => {
     peers: [],
     locked: req.body.locked
   };
-  gunRooms.get(req.body.title).put({ title: room.title, id: room.id, peers: {}, locked: room.locked });
+  var gunRoom = gunRooms.get(room.title).put({ title: room.title, id: room.id, peers: {}, locked: room.locked });
   rooms[room.id] = room;
   res.json(room);
 });
