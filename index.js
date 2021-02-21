@@ -50,7 +50,7 @@ app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
   gunRooms.open(function(data){
-    rooms = data;
+    rooms = clean(data);
     res.redirect('/rooms')
   })
   
