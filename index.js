@@ -60,7 +60,10 @@ app.get("/", async (req, res) => {
 app.get("/r/:id", (req, res) => {
   // replace with gun check
   gunRooms.open(function(data){
-    rooms = clean(data);
+    //rooms = clean(data);
+    console.log('sync rooms',data)
+   })
+    
     if (!rooms[req.params.id]) {
       console.log('missing room',req.params.id, rooms);
       res.redirect('/rooms');
@@ -73,8 +76,7 @@ app.get("/r/:id", (req, res) => {
       room: rooms[req.params.id],
       peerjs: {}
     });
-    
-   })
+
   
 });
 
