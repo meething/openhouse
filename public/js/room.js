@@ -374,6 +374,25 @@ function lockRoom(roomname) {
     .catch(e => console.log(e));
 }
 
+function killRoom(roomname) {
+  lock = lock ? false : true;
+  lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
+  console.log("switch lock!", lock, roomname);
+  // TODO Block New Participants
+  // TODO Update Room object for hiding
+  fetch(window.location.protocol + "rooms", {
+    method: "POST",
+    cache: "no-cache",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: roomname,
+      locked: true
+    })
+  })
+    .then(res => e => console.log(res))
+    .catch(e => console.log(e));
+}
+
 async function getICEServers() {
   var servers = [
     { urls: "stun:stun.l.google.com:19302" },
