@@ -12,6 +12,18 @@ var username = prompt(
   "Anonymous" + Math.floor(Math.random() * (999 - 111 + 1)) + 111
 );
 
+function initFingerprintJS() {
+    FingerprintJS.load().then(fp => {
+      // The FingerprintJS agent is ready.
+      // Get a visitor identifier when you'd like to.
+      fp.get().then(result => {
+        // This is the visitor identifier:
+        window.unique = result.visitorId;
+        console.log(window.unique);
+      });
+    });
+}
+
 const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
 const shareButton = document.getElementById("share-button");

@@ -18,7 +18,7 @@ var gunRooms = gun.get("rooms");
 function resyncRooms(){
   gunRooms.open(function(data){
     rooms = clean(data);
-    console.log('room data resync', rooms);
+    //console.log('room data resync', rooms);
   })
 }
 resyncRooms();
