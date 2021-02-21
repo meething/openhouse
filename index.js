@@ -54,7 +54,8 @@ app.get("/", async (req, res) => {
 
 app.get("/r/:id", (req, res) => {
   if (!rooms[req.params.id]) {
-    res.render("rooms", { rooms: rooms });
+    res.redirect('/rooms')
+    //res.render("rooms", { rooms: rooms });
     //res.render("404");
     return;
   }
