@@ -19,8 +19,18 @@
           radisk: false,
           file: false
         });
-        // GUN Rooms object
-        var gunRooms = gun.get('rooms');
+        // Raw gunRooms GUN
+        window.gunRooms = gun.get('rooms');
+        gun
+        .get("rooms")
+        .promOnce()
+        .then(obj => {
+          gunRooms = obj.data;
+          console.log(obj.data);
+  });
+        
+        // Clone EJS gunRooms GUN
+        var gunRooms = '<%- JSON.stringify(gunRooms) %>'; // test is now a valid js object
 
         if (window.devicePixelRatio) {
           console.log('pixel ratio', window.devicePixelRatio )
@@ -48,6 +58,7 @@
       </div>
      
       <div>
+        <!-- can't ejs use variables from the page? -->
         <% gunRooms.map().on(function (room, id) { %>
           
             <button onClick="joinRoom(event)" class="w-full px-6 py-4 mb-2 bg-orange-200 hover:bg-orange-300 rounded-md font-medium" name="<%= id %>">
