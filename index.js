@@ -31,21 +31,12 @@ var rooms = {
     title: "Lobby",
     peers: [],
     locked: false
-  },
-  meething: {
-    id: "meething",
-    title: "Meething",
-    peers: [],
-    locked: false
   }
 };
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json({ type: "application/json" }));
-
-// ROUTES
-
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
@@ -68,8 +59,6 @@ app.get("/r/:id", (req, res) => {
   });
 });
 
-// API
-
 app.post("/rooms", (req, res) => {
   var room = {
     id: uuidv4(),
@@ -77,9 +66,6 @@ app.post("/rooms", (req, res) => {
     peers: [],
     locked: req.body.locked
   };
-  var gunRoom = gunRooms.get(room.id).put({ title: room.title, id: room.id, locked: room.locked });
-  console.log('inserting',gunRoom);
-
   rooms[room.id] = room;
   res.json(room);
 });

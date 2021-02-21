@@ -3,6 +3,14 @@ function joinRoom(e) {
   window.location.href = "/r/" + e.target.name;
 }
 
+function joinGunRoom(e) {
+  e.preventDefault();
+  window.gunRooms.get(e.target.name).open(function(data){
+    console.log('room lookup',data,e.target.name);
+    if (data.id == e.target.name) window.location.href = "/r/" + e.target.name;
+  })
+}
+
 function startRoom() {
   var roomname = prompt("Please enter your room name", uuidv4());
   var uuid = uuidv4();
@@ -18,8 +26,10 @@ function startRoom() {
     })
   })
     .then(res => res.json())
-    .then(function(room){gunRooms.get(room.id).put({ title: room.title, id: room.id, locked: room.locked }) return room )
-    .then(room => (window.location.href = "/r/" + room.id))
+    .then(function(room){
+      (window.gunRooms.get(room.id).put({ title: room.title, id: room.id, locked: room.locked }) ) 
+      (window.location.href = "/r/" + room.id)
+    })
     .catch(e => console.log(e));
 }
 

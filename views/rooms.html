@@ -33,8 +33,8 @@
             gunRooms = clean(obj);
             var html = ejs.render('<% for (const [room, id] of Object.entries(gunRooms)){ %>'
                                   +' <%if (id != null) { %>'
-                                  +' <button onClick="joinRoom(event)" class="w-full px-6 py-4 mb-2 bg-gray-200 hover:bg-gray-300 rounded-md font-medium" name="<%= id.id %>">'
-                                  +'   <%= room %> (<%= id.title %>)'
+                                  +' <button onClick="joinRoom(event)" class="w-full px-6 py-4 mb-2 bg-gray-200 hover:bg-gray-300 rounded-md font-medium" name="<%= room %>">'
+                                  +'   <%= id.title %>'
                                   +' </button>'
                                   +' <% } %>'
                                   +'<% } %>', {gunRooms: gunRooms });
