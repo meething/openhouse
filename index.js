@@ -37,14 +37,7 @@ function clean(obj) {
 }
 
 var env = {};
-var rooms = {
-  lobby: {
-    id: "lobby",
-    title: "Lobby",
-    peers: [],
-    locked: false
-  }
-};
+var rooms;
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
@@ -54,7 +47,6 @@ app.use("/favicon.ico", express.static("favicon.ico"));
 app.get("/", async (req, res) => {
   resyncRooms();
   res.redirect('/rooms')
-  //res.render("rooms", { rooms: rooms });
 });
 
 app.get("/r/:id", (req, res) => {
@@ -63,7 +55,6 @@ app.get("/r/:id", (req, res) => {
       console.log('missing room',req.params.id, rooms);
       res.redirect('/rooms');
       //res.render("rooms", { rooms: rooms });
-      //res.render("404");
       return;
     }
 
@@ -94,7 +85,6 @@ app.use("/rooms", express.static(__dirname + "/views/rooms.html"));
 
 app.get("*", function(req, res) {
   res.redirect('/rooms')
-  //res.render("rooms", { rooms: rooms });
   //res.render("404");
 });
 

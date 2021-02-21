@@ -112,7 +112,7 @@ function onPeerLeft(remotePeerId) {
 }
 
 function leaveRoom(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   sendSignaling({ type: "peer-left-room", peerId: localId });
   window.location.href = "/";
 }
@@ -375,11 +375,13 @@ function lockRoom(roomname) {
 }
 
 function killRoom(roomname,unique) {
+  if (roomname == 'lobby' || roomname == "Lobby") return;
   console.log('kill room', roomname, unique);
   window.gunRooms.get(roomname).open(function(data){
     console.log('room lookup',roomname);
-    if ((data.id == roomname || data.title == roomname) && data.owner == unique) {
+    if ((data.id == roomname || data.title == roomname) && (data.owner == unique || !data.owner )) {
       console.log('room owner match!', data.id, unique);
+      sendSignaling({ type: "peer-kill-room", peerId: localId });
       var remove = window.gunRooms.path(data.id).put(null);
       window.location.href = "/rooms";
     } else {
@@ -458,6 +460,10 @@ async function loadDam(id) {
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
             onPeerJoined(data.peerId, localStream);
+            break;
+          case "peer-kill-room":
+            console.log(data.type, data);
+            leaveRoom();
             break;
           case "peer-left-room":
             console.log(data.type, data);
