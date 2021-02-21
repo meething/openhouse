@@ -46,6 +46,7 @@ app.get("/", async (req, res) => {
 
 app.get("/r/:id", (req, res) => {
   // replace with gun check
+  /*
   if (!rooms[req.params.id]) {
     console.log('missing room',req.params.id, rooms);
     res.redirect('/rooms')
@@ -53,6 +54,7 @@ app.get("/r/:id", (req, res) => {
     //res.render("404");
     return;
   }
+  */
   res.render("room", {
     room: rooms[req.params.id],
     peerjs: {}

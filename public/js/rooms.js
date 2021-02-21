@@ -7,7 +7,11 @@ function joinGunRoom(e) {
   e.preventDefault();
   window.gunRooms.get(e.target.name).open(function(data){
     console.log('room lookup',data,e.target.name);
-    if (data.id == e.target.name) window.location.href = "/r/" + e.target.name;
+    if (data.id == e.target.name) {
+      console.log('room match!', data.id, e.target.name);
+      joinRoom(e);
+      //(window.location.href = "/r/" + data.id)
+    }
   })
 }
 
