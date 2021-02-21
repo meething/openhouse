@@ -16,8 +16,8 @@ var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"],
 // GUN Rooms object - this is not persisting.....
 var gunRooms = gun.get("rooms");
 gunRooms.open(function(data){
-  console.log('room data', data);
-  rooms = data;
+  console.log('room data update', data);
+  rooms = clean(data);
 })
 
 const bodyParser = require("body-parser");
@@ -26,7 +26,7 @@ const { v4: uuidv4 } = require("uuid");
 // Helper
 function clean(obj) {
   for (var propName in obj) {
-    if (obj[propName] === null || obj[propName] === undefined) {
+    if (obj[propName] === null || obj[propName] === undefined || propName == "_") {
       delete obj[propName];
     }
   }
@@ -49,25 +49,33 @@ app.use(bodyParser.json({ type: "application/json" }));
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
-  res.redirect('/rooms')
+  gunRooms.open(function(data){
+    rooms = data;
+    res.redirect('/rooms')
+  })
+  
   //res.render("rooms", { rooms: rooms });
 });
 
 app.get("/r/:id", (req, res) => {
   // replace with gun check
+  gunRooms.open(function(data){
+    rooms = clean(data);
+    if (!rooms[req.params.id]) {
+      console.log('missing room',req.params.id, rooms);
+      res.redirect('/rooms');
+      //res.render("rooms", { rooms: rooms });
+      //res.render("404");
+      return;
+    }
+
+    res.render("room", {
+      room: rooms[req.params.id],
+      peerjs: {}
+    });
+    
+   })
   
-  if (!rooms[req.params.id]) {
-    console.log('missing room',req.params.id, rooms);
-    res.redirect('/rooms')
-    //res.render("rooms", { rooms: rooms });
-    //res.render("404");
-    return;
-  }
-  
-  res.render("room", {
-    room: rooms[req.params.id],
-    peerjs: {}
-  });
 });
 
 app.post("/rooms", (req, res) => {
