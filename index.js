@@ -8,7 +8,6 @@ require("gun/lib/open.js");
 require("gun/lib/not.js");
 
 var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"] });
-
 // GUN Rooms object - this is not persisting.....
 var gunRooms = gun.get("rooms");
 
@@ -57,6 +56,7 @@ app.get("/", async (req, res) => {
 app.get("/r/:id", (req, res) => {
   // replace with gun check
   if (!rooms[req.params.id]) {
+    console.log('missing room',req.params.id, rooms);
     res.redirect('/rooms')
     //res.render("rooms", { rooms: rooms });
     //res.render("404");
