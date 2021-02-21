@@ -5,13 +5,23 @@ const server = require("http").Server(app);
 // Shared GUN scope for ROOM management only (no signaling here)
 var Gun = require("gun");
 require("gun/lib/promise.js");
-var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"]});
+var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"] });
 
 // GUN Rooms object - this is not persisting.....
-var gunRooms = gun.get('rooms');
+var gunRooms = gun.get("rooms");
 
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
+
+// Helper
+function clean(obj) {
+  for (var propName in obj) {
+    if (obj[propName] === null || obj[propName] === undefined) {
+      delete obj[propName];
+    }
+  }
+  return obj;
+}
 
 var env = {};
 var rooms = {
@@ -38,7 +48,8 @@ app.use(bodyParser.json({ type: "application/json" }));
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
-  res.render("rooms", { rooms: rooms });
+  res.redirect('/rooms')
+  //res.render("rooms", { rooms: rooms });
 });
 
 app.get("/r/:id", (req, res) => {
@@ -63,18 +74,20 @@ app.post("/rooms", (req, res) => {
     peers: [],
     locked: req.body.locked
   };
+  gunRooms.get(req.body.title).put({ title: room.title, id: room.id, peers: {}, locked: room.locked });
   rooms[room.id] = room;
   res.json(room);
 });
 
 // GUN Rooms
 
-app.use('/rooms', express.static(__dirname + '/views/rooms.html'))
+app.use("/rooms", express.static(__dirname + "/views/rooms.html"));
 
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms: rooms });
+  res.redirect('/rooms')
+  //res.render("rooms", { rooms: rooms });
   //res.render("404");
 });
 
