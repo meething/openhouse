@@ -77,7 +77,9 @@ app.post("/rooms", (req, res) => {
     peers: [],
     locked: req.body.locked
   };
-  var gunRoom = gunRooms.get(room.title).put({ title: room.title, id: room.id, peers: {}, locked: room.locked });
+  var gunRoom = gunRooms.get(room.id).put({ title: room.title, id: room.id, locked: room.locked });
+  console.log('inserting',gunRoom);
+
   rooms[room.id] = room;
   res.json(room);
 });

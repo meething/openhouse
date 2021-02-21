@@ -5,8 +5,8 @@ function joinRoom(e) {
 
 function startRoom() {
   var roomname = prompt("Please enter your room name", uuidv4());
+  var uuid = uuidv4();
   // currently set by API/server side
-  // gunRooms.get(roomname).put({ title: roomname, id: roomname, peers: {}, locked: false });
 
   fetch(window.location.protocol + "rooms", {
     method: "POST",
@@ -18,6 +18,7 @@ function startRoom() {
     })
   })
     .then(res => res.json())
+    .then(function(room){gunRooms.get(room.id).put({ title: room.title, id: room.id, locked: room.locked }) return room )
     .then(room => (window.location.href = "/r/" + room.id))
     .catch(e => console.log(e));
 }
