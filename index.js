@@ -5,16 +5,11 @@ const server = require("http").Server(app);
 // Shared GUN scope for ROOM management only (no signaling here)
 var Gun = require("gun");
 require("gun/lib/promise.js");
-var gun = Gun({
-  peers: ["https://gundb-multiserver.glitch.me/openhouse"],
-  multicast: false,
-  localStorage: false,
-  radisk: false,
-  file: false
-});
+var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"]});
 
-// GUN Rooms object
+// GUN Rooms object - this is not persisting.....
 var gunRooms = gun.get('rooms');
+/*
 gunRooms.put({
   lobby: {
     id: "lobby",
@@ -23,6 +18,7 @@ gunRooms.put({
     locked: false
   }
 });
+*/
 
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
@@ -52,12 +48,12 @@ app.use(bodyParser.json({ type: "application/json" }));
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
-  res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
+  res.render("rooms", { rooms: rooms, gunRooms: gun.get('rooms') });
 });
 
 app.get("/r/:id", (req, res) => {
   if (!rooms[req.params.id]) {
-    res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
+    res.render("rooms", { rooms: rooms, gunRooms: gun.get('rooms') });
     //res.render("404");
     return;
   }
@@ -85,7 +81,7 @@ app.post("/rooms", (req, res) => {
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
+  res.render("rooms", { rooms: rooms, gunRooms: gun.get('rooms') });
   //res.render("404");
 });
 
