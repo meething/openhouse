@@ -2,22 +2,31 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=yes" />
     <title>Openhouse</title>
     <script src="/js/rooms.js" defer></script>
     <link href="/css/style.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/lib/promise.js"></script>
     <script>
-      // Shared GUN scope for ROOM management only (no signaling here)
-      var gun = Gun({
-        peers: ["https://gundb-multiserver.glitch.me/openhouse"],
-        multicast: false,
-        localStorage: false,
-        radisk: false,
-        file: false
-      });
-      // GUN Rooms object
-      var gunRooms = gun.get('rooms');
+      (function() {
+        console.log('room browser bootstrap')
+        // Shared GUN scope for ROOM management only (no signaling here)
+        var gun = Gun({
+          peers: ["https://gundb-multiserver.glitch.me/openhouse"],
+          multicast: false,
+          localStorage: false,
+          radisk: false,
+          file: false
+        });
+        // GUN Rooms object
+        var gunRooms = gun.get('rooms');
+
+        if (window.devicePixelRatio) {
+          console.log('pixel ratio', window.devicePixelRatio )
+        }
+        
+    })();
     </script>
 
   </head>
