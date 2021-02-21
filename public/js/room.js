@@ -375,7 +375,17 @@ function lockRoom(roomname) {
 }
 
 function killRoom(roomname,unique) {
-  console.log('kill room', roomname, unique)
+  console.log('kill room', roomname, unique);
+  window.gunRooms.get(roomname).open(function(data){
+    console.log('room lookup',roomname);
+    if ((data.id == roomname || data.title == roomname) && data.owner == unique) {
+      console.log('room owner match!', data.id, unique);
+      var remove = window.gunRooms.path(data.id).put(null);
+      window.location.href = "/rooms";
+    } else {
+      console.log('delete blocked!')
+    }
+  })
 
 }
 

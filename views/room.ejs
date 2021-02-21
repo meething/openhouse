@@ -11,7 +11,8 @@
     </script>
     <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/lib/promise.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/lib/open.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/lib/path.js"></script>
     <script>
       (function() {
         console.log('room browser bootstrap')
@@ -26,7 +27,6 @@
         // Raw gunRooms GUN
         window.gunRooms = gun.get('rooms');
         // Clone EJS gunRooms GUN
-        
     })();
     </script>
     <script src="/js/room.js" defer></script>
