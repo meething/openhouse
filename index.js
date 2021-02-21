@@ -52,11 +52,8 @@ app.use(bodyParser.json({ type: "application/json" }));
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
-  gunRooms.open(function(data){
-    resyncRooms();
-    res.redirect('/rooms')
-  })
-  
+  resyncRooms();
+  res.redirect('/rooms')
   //res.render("rooms", { rooms: rooms });
 });
 
@@ -71,7 +68,7 @@ app.get("/r/:id", (req, res) => {
     }
 
     res.render("room", {
-      room: rooms[req.params.id],
+      room: rooms[req.params.id], 
       peerjs: {}
     });
 
