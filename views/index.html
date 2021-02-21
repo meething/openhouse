@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=yes" />
+    <title>Openhouse</title>
+    <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.6/ejs.min.js"></script>
+    <script src="/js/rooms.js" defer></script>
+    <link href="/css/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/lib/promise.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function(event) {
+
+        console.log('room browser bootstrap')
+        // Shared GUN scope for ROOM management only (no signaling here!)
+        var gun = Gun({
+          peers: ["https://gundb-multiserver.glitch.me/openhouse"],
+          multicast: false,
+          localStorage: false,
+          radisk: false,
+          file: false
+        });
+        // Raw gunRooms GUN
+        window.gunRooms = gun.get('rooms');
+        
+        var html = ejs.render('<% gunRooms.map().on(function (room, id) { %>  <button onClick="joinRoom(event)" class="w-full px-6 py-4 mb-2 bg-orange-200 hover:bg-orange-300 rounded-md font-medium" name="<%= id %>"> <%= id %> (<%= room.peers.length || 0 %>) </button> <% }) %>', {gunRooms: window.gunRooms });
+        // Vanilla JS:
+        document.getElementById('output').innerHTML = html;
+        
+    });
+    </script>
+
+  </head>
+  <body>
+    <div id="bins">
+    </div>
+    <div class="max-w-4xl min-h-screen box-border px-10 py-5 mx-auto my-0">
+      <h1 style="display: inline;" class="text-5xl my-10 " >openhøüse</h1>
+      <button onclick="startRoom()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 mt-4 mb-12 w-full rounded-full">+ Start a Room</button>
+     
+      <!-- experimental block -->
+      <div id="output"></div>
+      <script>
+        
+      </script>
+      
+    </div>
+  </body>
+</html>

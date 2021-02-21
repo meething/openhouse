@@ -78,6 +78,10 @@ app.post("/rooms", (req, res) => {
   res.json(room);
 });
 
+// GUN Rooms
+
+app.use('/gunrooms', express.static('views'))
+
 // NOT FOUND
 
 app.get("*", function(req, res) {
