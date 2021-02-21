@@ -4,7 +4,9 @@ const server = require("http").Server(app);
 
 // Shared GUN scope for ROOM management only (no signaling here)
 var Gun = require("gun");
-require("gun/lib/promise.js");
+require("gun/lib/open.js");
+require("gun/lib/not.js");
+
 var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"] });
 
 // GUN Rooms object - this is not persisting.....
@@ -53,6 +55,7 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/r/:id", (req, res) => {
+  // replace with gun check
   if (!rooms[req.params.id]) {
     res.redirect('/rooms')
     //res.render("rooms", { rooms: rooms });
