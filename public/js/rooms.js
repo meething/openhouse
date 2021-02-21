@@ -3,6 +3,18 @@ function joinRoom(e) {
   window.location.href = "/r/" + e.target.name;
 }
 
+function initFingerprintJS() {
+    FingerprintJS.load().then(fp => {
+      // The FingerprintJS agent is ready.
+      // Get a visitor identifier when you'd like to.
+      fp.get().then(result => {
+        // This is the visitor identifier:
+        window.unique = result.visitorId;
+        console.log(window.unique);
+      });
+    });
+}
+
 function joinGunRoom(e) {
   e.preventDefault();
   console.log('got event',e)
@@ -32,7 +44,7 @@ function startRoom() {
   })
     .then(res => res.json())
     .then(function(room){
-      (window.gunRooms.get(room.id).put({ title: room.title, id: room.id, locked: room.locked }) ) 
+      (window.gunRooms.get(room.id).put({ title: room.title, id: room.id, locked: room.locked, owner: window.unique }) ) 
       (window.location.href = "/r/" + room.id)
     })
     .catch(e => console.log(e));
