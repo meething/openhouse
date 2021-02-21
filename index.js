@@ -21,12 +21,6 @@ gunRooms.put({
     title: "Lobby",
     peers: {},
     locked: false
-  },
-  meething: {
-    id: "meething",
-    title: "Meething",
-    peers: {},
-    locked: false
   }
 });
 

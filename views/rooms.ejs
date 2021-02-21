@@ -21,20 +21,8 @@
         });
         // Raw gunRooms GUN
         window.gunRooms = gun.get('rooms');
-        gun
-        .get("rooms")
-        .promOnce()
-        .then(obj => {
-          gunRooms = obj.data;
-          console.log(obj.data);
-  });
-        
         // Clone EJS gunRooms GUN
-        var gunRooms = '<%- JSON.stringify(gunRooms) %>'; // test is now a valid js object
-
-        if (window.devicePixelRatio) {
-          console.log('pixel ratio', window.devicePixelRatio )
-        }
+        var gunRooms = '<%- JSON.stringify(gunRooms) %>';
         
     })();
     </script>
