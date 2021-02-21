@@ -7,7 +7,12 @@ var Gun = require("gun");
 require("gun/lib/open.js");
 require("gun/lib/not.js");
 
-var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"] });
+var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"],
+    multicast: false,
+    localStorage: false,
+    radisk: false,
+    file: false
+    });
 // GUN Rooms object - this is not persisting.....
 var gunRooms = gun.get("rooms");
 gunRooms.open(function(data){

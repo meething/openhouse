@@ -5,6 +5,7 @@ function joinRoom(e) {
 
 function joinGunRoom(e) {
   e.preventDefault();
+  console.log('got event',e)
   window.gunRooms.get(e.target.name).open(function(data){
     console.log('room lookup',data,e.target.name);
     if (data.id == e.target.name) {

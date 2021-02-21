@@ -32,9 +32,9 @@
         window.gunRooms.open(function(obj){
             gunRooms = clean(obj);
             var html = ejs.render('<% for (const [room, id] of Object.entries(gunRooms)){ %>'
-                                  +' <%if (id != null) { %>'
+                                  +' <%if (id != null && id.title ) { %>'
                                   +' <button onClick="joinGunRoom(event)" class="w-full px-6 py-4 mb-2 bg-gray-200 hover:bg-gray-300 rounded-md font-medium" name="<%= room %>">'
-                                  +'   <%= id.title %>'
+                                  +'   <%= id.title %> (<%= room %>)'
                                   +' </button>'
                                   +' <% } %>'
                                   +'<% } %>', {gunRooms: gunRooms });

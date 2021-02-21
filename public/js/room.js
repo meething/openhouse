@@ -392,7 +392,7 @@ async function loadDam(id) {
   } catch (e) {
     console.log(e);
   }
-
+  // GUN DAM - do not remove any options! signaling only channel
   var root = Gun({
     peers: ["https://gundb-multiserver.glitch.me/openhouse_" + ROOM_ID],
     rtc: { iceServers: await getICEServers() },
