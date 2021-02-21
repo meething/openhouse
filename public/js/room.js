@@ -31,6 +31,7 @@ var gun = Gun({
 var gunRooms = gun.get("rooms");
 // GUN ROOM Scope (alternative channel)
 var gunRoom = gunRooms.get(ROOM_ID);
+gunRoom.get('name').put(ROOM_ID)
 // BACKUP CHANNEL. Returns the last value. Needs TS > now()
 //gunRoom.on(function(data, key) {
 //  console.log("gun update:", data, key);
@@ -401,38 +402,7 @@ async function loadDam(id) {
     file: false
   });
 
-  if (localStorage.getItem("dam")) {
-    // does this ever work?
-    const dam = root.back("opt.mesh");
-    console.log("Localstorage DAM");
-    dam.hear.signaling = (msg, peer) => {
-      const { name, message } = msg;
-      // do something with peerjs
-    };
-    dam.hear.log = (msg, peer) => {
-      const { name, log } = msg;
-      console.log(log, name);
-      // do something with peerjs
-    };
-    dam.hear.image = (msg, peer) => {
-      const { image } = msg;
-      console.log("got image!");
-      var canvas = document.getElementById("canvas");
-      var ctx = canvas.getContext("2d");
-      ctx.drawImage(image, 0, 0);
-    };
-
-    sendFrame = image => {
-      console.log("sending frame!");
-      dam.say({ dam: "image", image });
-    };
-    sendLog = log => {
-      dam.say({ dam: "log", name: user, log });
-    };
-    sendSignaling = data => {
-      dam.say({ dam: "signaling", name: user, data });
-    };
-  } else {
+  
     console.log("Root DAM");
     root.on("in", function(msg) {
       if (msg.log) {
@@ -450,7 +420,8 @@ async function loadDam(id) {
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
             // TRIGGER FOR peer-joined-room! do nothing or use for username pairing only
-            onPeerJoined(msg.signaling.peerId, localStream);
+            onPeerJoined(data.peerId, localStream);
+            gunRoom.get('peers').get(data.peerId).put(msg.signaling);
             break;
           case "peer-joined-room":
             console.log(data.type, data);
@@ -461,6 +432,10 @@ async function loadDam(id) {
             console.log(data.type, data);
             delete remoteUsers[data.peerId];
             onPeerLeft(data.peerId);
+            // cleanup
+            gunRoom.get('peers').get(data.peerId).put(null);
+            var count = gunRoom.get('peers').length;
+            sendLog('room state count '+count);
             break;
           case "peer-toggle-mute":
             console.log(data.type, data);
@@ -496,7 +471,7 @@ async function loadDam(id) {
       const id = randId();
       root.on("out", { "#": id, image: { image } });
     };
-  }
+  
 
   function randId() {
     return Math.random()

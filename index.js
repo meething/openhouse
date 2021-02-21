@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const server = require("http").Server(app);
 
+// Shared GUN scope for ROOM management only (no signaling here)
 var Gun = require("gun");
 require("gun/lib/promise.js");
 var gun = Gun({
@@ -10,6 +11,17 @@ var gun = Gun({
   localStorage: false,
   radisk: false,
   file: false
+});
+
+// GUN Rooms object
+var gunRooms = gun.get('rooms');
+gunRooms.put({
+  lobby: {
+    id: "lobby",
+    title: "Lobby",
+    peers: {},
+    locked: false
+  }
 });
 
 const bodyParser = require("body-parser");
@@ -40,17 +52,18 @@ app.use(bodyParser.json({ type: "application/json" }));
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
-  res.render("rooms", { rooms });
+  res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
 });
 
 app.get("/r/:id", (req, res) => {
   if (!rooms[req.params.id]) {
-    res.render("rooms", { rooms });
+    res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
     //res.render("404");
     return;
   }
   res.render("room", {
     room: rooms[req.params.id],
+    gunRooms: gunRooms,
     peerjs: {}
   });
 });
@@ -65,13 +78,14 @@ app.post("/rooms", (req, res) => {
     locked: req.body.locked
   };
   rooms[room.id] = room;
+  var gunRoom = gunRooms.get(req.body.title).put({ title: req.body.title, id: room.id, locked: req.body.locked });
   res.json(room);
 });
 
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms });
+  res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
   //res.render("404");
 });
 

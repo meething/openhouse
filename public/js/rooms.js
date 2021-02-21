@@ -6,7 +6,8 @@ function joinRoom(e) {
 function startRoom() {
   var roomname = prompt("Please enter your room name", uuidv4());
   // currently set by API/server side
-  //var room = gunRooms.get(roomname).set({ title: roomname, id: roomname, peers: {}, locked: false });
+  // gunRooms.get(roomname).put({ title: roomname, id: roomname, peers: {}, locked: false });
+
   fetch(window.location.protocol + "rooms", {
     method: "POST",
     cache: "no-cache",
