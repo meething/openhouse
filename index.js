@@ -15,10 +15,13 @@ var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"],
     });
 // GUN Rooms object - this is not persisting.....
 var gunRooms = gun.get("rooms");
-gunRooms.open(function(data){
-  console.log('room data update', data);
-  rooms = clean(data);
-})
+function resyncRooms(){
+  gunRooms.open(function(data){
+    rooms = clean(data);
+    console.log('room data resync', rooms);
+  })
+}
+resyncRooms();
 
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
@@ -26,7 +29,7 @@ const { v4: uuidv4 } = require("uuid");
 // Helper
 function clean(obj) {
   for (var propName in obj) {
-    if (obj[propName] === null || obj[propName] === undefined || propName == "_") {
+    if (obj[propName] === null || obj[propName] === undefined || propName == "_" ) {
       delete obj[propName];
     }
   }
@@ -50,7 +53,7 @@ app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
   gunRooms.open(function(data){
-    rooms = clean(data);
+    resyncRooms();
     res.redirect('/rooms')
   })
   
@@ -58,12 +61,7 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/r/:id", (req, res) => {
-  // replace with gun check
-  gunRooms.open(function(data){
-    //rooms = clean(data);
-    console.log('sync rooms',data)
-   })
-    
+    // replace with gun check
     if (!rooms[req.params.id]) {
       console.log('missing room',req.params.id, rooms);
       res.redirect('/rooms');

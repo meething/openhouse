@@ -7,8 +7,8 @@ function joinGunRoom(e) {
   e.preventDefault();
   console.log('got event',e)
   window.gunRooms.get(e.target.name).open(function(data){
-    console.log('room lookup',data,e.target.name);
-    if (data.id == e.target.name) {
+    console.log('room lookup',e.target.name, data.id);
+    if (data.id == e.target.name || data.title == e.target.name) {
       console.log('room match!', data.id, e.target.name);
       joinRoom(e);
       //(window.location.href = "/r/" + data.id)

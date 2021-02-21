@@ -7,19 +7,35 @@
     <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.6/ejs.min.js"></script>
     <script src="/js/rooms.js" defer></script>
     <link href="/css/style.css" rel="stylesheet">
+    <script
+      async
+      src="//cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"
+      onload="initFingerprintJS()"
+    ></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/lib/open.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/lib/path.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function(event) {
-
+        var unique;
+        function initFingerprintJS() {
+          FingerprintJS.load().then(fp => {
+            // The FingerprintJS agent is ready.
+            // Get a visitor identifier when you'd like to.
+            fp.get().then(result => {
+              // This is the visitor identifier:
+              unique = result.visitorId;
+              console.log(visitorId);
+            });
+          });
+        }
         console.log('room browser bootstrap')
         // Shared GUN scope for ROOM management only (no signaling here!)
         var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"] });
         // Helper
         function clean(obj) {
           for (var propName in obj) {
-            if (obj[propName] === null || obj[propName] === undefined) {
+            if (obj[propName] === null || obj[propName] === undefined || propName == "_" ) {
               delete obj[propName];
             }
           }
