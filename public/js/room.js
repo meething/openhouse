@@ -72,7 +72,7 @@ localPeer.on("open", localPeerId => {
   localId = localPeerId;
   console.log("pushing self to DAMN", ROOM_ID, localPeerId);
   gunRoom.get('count').count(+1);
-  // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
+  gunRoom.get('peers').get(localPeerId).put(localPeerId);
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
   sendSignaling({
@@ -491,7 +491,7 @@ async function loadDam(id) {
             // cleanup
             // gunRoom.get('count').count(-1);
             gunRoom.get('peers').path(data.peerId).put(null);
-            var count = gunRoom.get('peers').length;
+            //var count = gunRoom.get('peers').length;
             sendLog('room state count '+count);
             break;
           case "peer-toggle-mute":
