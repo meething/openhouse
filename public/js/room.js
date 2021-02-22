@@ -78,9 +78,19 @@ localPeer.on("open", localPeerId => {
       localStream.getAudioTracks()[0].enabled = true;
       onToggleMute();
     };
+    // Audiocall Route
     localPeer.on("call", call => {
       call.answer(localStream);
       call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
+    });
+    // Datachannels Route
+    localPeer.on('connection', function(conn) {
+        conn.on('open', function() {
+          // Receive Screenshare Frames
+          conn.on('data', function(data) {
+            console.log('Received', data);
+          });
+        });
     });
 
     // JOIN-ROOM Trigger seems no longer needed?
