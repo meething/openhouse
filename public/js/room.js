@@ -30,6 +30,20 @@ const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
 const screenButton = document.getElementById("screen-button");
 
+// Gun Counters
+Gun.chain.count = function (num) {
+  if (typeof num === 'number') {
+    this.path(Gun.text.random()).put(num);
+  }
+  if (typeof num === 'function') {
+    var sum = 0;
+    this.map().val(function (val) {
+      num(sum += val);
+    });
+  }
+  return this;
+};
+
 // Connect to multisocket for ROOMS only! DAM uses different scope
 var gun = Gun({
   peers: ["https://gundb-multiserver.glitch.me/openhouse"],
