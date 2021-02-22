@@ -107,7 +107,7 @@ localPeer.on("open", localPeerId => {
         call.answer(localStream);
         call.on("stream", function(remoteStream){
           screenButton.style.display = "none";
-          peerGrid.style.display = "none";
+          peerGrid.style.visibility = "hidden";
           video.srcObject = remoteStream
           video.addEventListener('loadedmetadata', () => {
             video.play()
@@ -115,7 +115,7 @@ localPeer.on("open", localPeerId => {
         });
         call.on('close', () => {
           screenButton.style.display = "block";
-          peerGrid.style.display = "block";
+          peerGrid.style.visibility = "visible";
           video.remove()
         })
         call.on('error', () => {
@@ -336,10 +336,10 @@ async function shareScreen(ev) {
   let videoElement = document.getElementById("shareview");
   // if we are already sharing, stop the sharing.
   if (sharingScreen) {
+    sendSignaling({ type: "stop-screen-share", peerId: localId, roomId: ROOM_ID, username: username });
     let tracks = videoElement.srcObject.getTracks();
     tracks.forEach(track => track.stop());
     videoElement.srcObject = null;
-    localSharing.close();
     sharingScreen = false;
     return;
   }
@@ -359,6 +359,15 @@ async function shareScreen(ev) {
   videoElement.srcObject = sharedScreenStream;
 
   return;
+}
+
+async function stopScreenShare(id) {
+  let video = document.getElementById("shareview");
+  let peerGrid = document.getElementById("peer-grid");
+  localSharing.close();
+  screenButton.style.display = "block";
+  peerGrid.style.visibility = "visible";
+  video.remove();
 }
 
 async function sendScreenToAll(mediaStream) {
@@ -564,6 +573,10 @@ async function loadDam(id) {
           case "peer-toggle-mute":
             console.log(data.type, data);
             onPeerToggleMute(data.peerId, data.isMuted);
+            break;
+          case "stop-screen-share":
+            console.log(data.type, data);
+            stopScreenShare();
             break;
         }
       }
