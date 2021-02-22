@@ -71,6 +71,7 @@ localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   localId = localPeerId;
   console.log("pushing self to DAMN", ROOM_ID, localPeerId);
+  gunRoom.get('count').count(+1);
   // gunRoom.put({ name: "peer-joined-room", id: localPeerId });
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
@@ -128,6 +129,7 @@ function onPeerLeft(remotePeerId) {
 function leaveRoom(e) {
   if (e) e.preventDefault();
   sendSignaling({ type: "peer-left-room", peerId: localId });
+  gunRoom.get('count').count(-1);
   window.location.href = "/";
 }
 
@@ -406,7 +408,9 @@ function killRoom(roomname,unique) {
 }
 
 function countRoom(roomname) {
-  Object.keys(gunRoom.peers||{}).length;  
+  var pcount = Object.keys(gunRoom.peers||{}).length;  
+  var count =  gunRoom.count(0);  
+  return { peers: pcount, count: count};
 }
 
 async function getICEServers() {
@@ -474,6 +478,7 @@ async function loadDam(id) {
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
             onPeerJoined(data.peerId, localStream);
+            
             break;
           case "peer-kill-room":
             console.log(data.type, data);
@@ -484,7 +489,8 @@ async function loadDam(id) {
             delete remoteUsers[data.peerId];
             onPeerLeft(data.peerId);
             // cleanup
-            gunRoom.get('peers').get(data.peerId).put(null);
+            // gunRoom.get('count').count(-1);
+            gunRoom.get('peers').path(data.peerId).put(null);
             var count = gunRoom.get('peers').length;
             sendLog('room state count '+count);
             break;
