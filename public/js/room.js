@@ -309,6 +309,7 @@ async function shareScreen(ev) {
 
 async function sendScreenToAll(mediaStream) {
   localPeer._connections.forEach((peer, i) => {
+    if (peer == localId) return;
     console.log("sharing to", peer, mediaStream);
     try {
       localPeer.call(peer[0].id, mediaStream);
