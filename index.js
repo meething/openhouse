@@ -22,7 +22,7 @@ function resyncRooms(){
   })
 }
 // Force Provision the lobby?
-window.gunRooms.get('lobby').put({ title: 'Lobby', id: 'lobby', locked: false, owner: 'openhouse-admin' }); 
+gunRooms.get('lobby').put({ title: 'Lobby', id: 'lobby', locked: false, owner: 'openhouse-admin' }); 
 resyncRooms();
 
 const bodyParser = require("body-parser");
