@@ -29,6 +29,8 @@ const muteButton = document.getElementById("mute-button");
 const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
 const screenButton = document.getElementById("screen-button");
+const killButton = document.getElementById("kill-button");
+
 
 // Connect to multisocket for ROOMS only! DAM uses different scope
 var gun = Gun({
@@ -44,6 +46,18 @@ var gunRooms = gun.get("rooms");
 // GUN ROOM Scope (alternative channel)
 var gunRoom = gunRooms.get(ROOM_ID);
 countRoom();
+
+// OWNER BLOCK
+gunRoom.open(function(room){
+  if (room && room.owner){
+    if (room.owner != window.unique){
+      killButton.style.display = "none";
+    } else {
+      console.log('You own this room!', room.id)
+    }
+  }
+})
+
 
 // BACKUP CHANNEL. Returns the last value. Needs TS > now()
 //gunRoom.on(function(data, key) {
@@ -86,18 +100,22 @@ localPeer.on("open", localPeerId => {
         call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
       } else if (call.metadata.type == "screenshare") {
         console.log('got screenshare stream!')
-        /*
+        let video = document.getElementById("shareview");
         call.answer(localStream);
         call.on("stream", function(remoteStream){
+          screenButton.style.display = "none";
           video.srcObject = remoteStream
           video.addEventListener('loadedmetadata', () => {
             video.play()
           })
-        });  
-        */
+        });
+        call.on('close', () => {
+          screenButton.style.display = "block";
+          video.remove()
+        })
       }
     });
-    // Datachannels Route
+    // Datachannels Route (unused)
     localPeer.on('connection', function(conn) {
         if (conn.metadata) console.log('connection meta',conn.metadata);
         conn.on('open', function() {
