@@ -407,10 +407,11 @@ function killRoom(roomname,unique) {
 
 }
 
-function countRoom(roomname) {
-  var pcount = Object.keys(gunRoom.peers||{}).length;  
-  var count =  gunRoom.count(0);  
-  return { peers: pcount, count: count};
+async function countRoom(roomname) {
+  var count = gunRoom.get('peers').once(function(data){
+    return Object.keys(data).length                                    
+  });
+  return count;
 }
 
 async function getICEServers() {
