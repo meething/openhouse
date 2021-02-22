@@ -1,6 +1,7 @@
 var remotePeers = {};
 var remoteUsers = {};
 var localStream = null;
+var localSharing = false;
 const localPeer = new Peer();
 var localId;
 var lock = false;
@@ -102,6 +103,7 @@ localPeer.on("open", localPeerId => {
         console.log('got screenshare stream!')
         let video = document.getElementById("shareview");
         let peerGrid = document.getElementById("peer-grid");
+        localSharing = call;
         call.answer(localStream);
         call.on("stream", function(remoteStream){
           screenButton.style.display = "none";
@@ -337,6 +339,7 @@ async function shareScreen(ev) {
     let tracks = videoElement.srcObject.getTracks();
     tracks.forEach(track => track.stop());
     videoElement.srcObject = null;
+    localSharing.close();
     sharingScreen = false;
     return;
   }

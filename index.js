@@ -22,7 +22,7 @@ function resyncRooms(){
   })
 }
 // Force Provision the lobby?
-gunRooms.get('lobby').put({ title: 'Lobby', id: 'lobby', locked: false, owner: 'openhouse-admin' }); 
+//gunRooms.get('lobby').put({ title: 'Lobby', id: 'lobby', locked: false, owner: 'openhouse-admin', count: 99 }); 
 resyncRooms();
 
 const bodyParser = require("body-parser");
@@ -54,6 +54,7 @@ app.get("/", async (req, res) => {
 app.get("/r/:id", (req, res) => {
     // replace with gun check
     if (!rooms[req.params.id]) {
+      resyncRooms();
       console.log('missing room',req.params.id, rooms);
       res.redirect('/rooms');
       //res.render("rooms", { rooms: rooms });
