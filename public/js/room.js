@@ -410,8 +410,11 @@ async function countRoom(roomname) {
     var counter = Object.keys(clean(data));
     gunRoom.get('count').put(Object.keys(counter).length)
     if (counter <= 0){
-      // destroy room
-      
+      // destroy empty room
+      console.log('destroying room',roomname);
+      gunRoom.get('owner').once(function(owner){
+          killRoom(roomname,owner);
+      });
     }
   });
 }

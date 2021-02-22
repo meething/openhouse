@@ -28,6 +28,7 @@ function joinGunRoom(e) {
   })
 }
 
+
 function startRoom() {
   var roomname = prompt("Please enter your room name", uuidv4());
   var uuid = uuidv4();

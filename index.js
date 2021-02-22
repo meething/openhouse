@@ -62,8 +62,6 @@ app.get("/r/:id", (req, res) => {
       room: rooms[req.params.id], 
       peerjs: {}
     });
-
-  
 });
 
 app.post("/rooms", (req, res) => {

@@ -22,7 +22,7 @@
         // Helper
         function clean(obj) {
           for (var propName in obj) {
-            if (obj[propName] === null || obj[propName] === undefined || propName == "_" ) {
+            if (obj[propName] === null || obj[propName] === undefined || propName == "_" || obj[propname].count < 1) {
               delete obj[propName];
             }
           }
