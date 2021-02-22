@@ -359,7 +359,8 @@ function mediaAnalyze() {
   }
 }
 
-function lockRoom(roomname,unique) {
+function lockRoom(e,roomname,unique) {
+  e.preventDefault();
   // TODO Block New Participants
   // TODO Update Room object for hiding
   if (roomname == 'lobby' || roomname == "Lobby") return;
@@ -372,8 +373,10 @@ function lockRoom(roomname,unique) {
       lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
       console.log("switch lock!", lock, roomname);
       window.gunRooms.get(roomname).get('lock').put(lock);
+      return false;
     } else {
       console.log('locking blocked!')
+      return false;
     }
   })
   return false;
