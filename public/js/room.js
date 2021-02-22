@@ -12,6 +12,18 @@ var username = prompt(
   "Anonymous" + Math.floor(Math.random() * (999 - 111 + 1)) + 111
 );
 
+function initFingerprintJS() {
+    FingerprintJS.load().then(fp => {
+      // The FingerprintJS agent is ready.
+      // Get a visitor identifier when you'd like to.
+      fp.get().then(result => {
+        // This is the visitor identifier:
+        window.unique = result.visitorId;
+        console.log(window.unique);
+      });
+    });
+}
+
 const peerGrid = document.getElementById("peer-grid");
 const muteButton = document.getElementById("mute-button");
 const shareButton = document.getElementById("share-button");
@@ -100,7 +112,7 @@ function onPeerLeft(remotePeerId) {
 }
 
 function leaveRoom(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   sendSignaling({ type: "peer-left-room", peerId: localId });
   window.location.href = "/";
 }
@@ -362,6 +374,27 @@ function lockRoom(roomname) {
     .catch(e => console.log(e));
 }
 
+function killRoom(roomname,unique) {
+  if (roomname == 'lobby' || roomname == "Lobby") return;
+  console.log('kill room', roomname, unique);
+  window.gunRooms.get(roomname).open(function(data){
+    console.log('room lookup',roomname);
+    if ((data.id == roomname || data.title == roomname) && (data.owner == unique || !data.owner )) {
+      console.log('room owner match!', data.id, unique);
+      sendSignaling({ type: "peer-kill-room", peerId: localId });
+      var remove = window.gunRooms.path(data.id).put(null);
+      window.location.href = "/rooms";
+    } else {
+      console.log('delete blocked!')
+    }
+  })
+
+}
+
+function countRoom(roomname) {
+  Object.keys(gunRoom.peers||{}).length;  
+}
+
 async function getICEServers() {
   var servers = [
     { urls: "stun:stun.l.google.com:19302" },
@@ -392,7 +425,7 @@ async function loadDam(id) {
   } catch (e) {
     console.log(e);
   }
-
+  // GUN DAM - do not remove any options! signaling only channel
   var root = Gun({
     peers: ["https://gundb-multiserver.glitch.me/openhouse_" + ROOM_ID],
     rtc: { iceServers: await getICEServers() },
@@ -427,6 +460,10 @@ async function loadDam(id) {
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
             onPeerJoined(data.peerId, localStream);
+            break;
+          case "peer-kill-room":
+            console.log(data.type, data);
+            leaveRoom();
             break;
           case "peer-left-room":
             console.log(data.type, data);

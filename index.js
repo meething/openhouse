@@ -4,71 +4,67 @@ const server = require("http").Server(app);
 
 // Shared GUN scope for ROOM management only (no signaling here)
 var Gun = require("gun");
-require("gun/lib/promise.js");
-var gun = Gun({
-  peers: ["https://gundb-multiserver.glitch.me/openhouse"],
-  multicast: false,
-  localStorage: false,
-  radisk: false,
-  file: false
-});
+require("gun/lib/open.js");
+require("gun/lib/not.js");
 
-// GUN Rooms object
-var gunRooms = gun.get('rooms');
-gunRooms.put({
-  lobby: {
-    id: "lobby",
-    title: "Lobby",
-    peers: {},
-    locked: false
-  }
-});
+var gun = Gun({ peers: ["https://gundb-multiserver.glitch.me/openhouse"],
+    multicast: false,
+    localStorage: false,
+    radisk: false,
+    file: false
+    });
+// GUN Rooms object - this is not persisting.....
+var gunRooms = gun.get("rooms");
+function resyncRooms(){
+  gunRooms.open(function(data){
+    rooms = clean(data);
+    //console.log('room data resync', rooms);
+  })
+}
+resyncRooms();
 
 const bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
 
-var env = {};
-var rooms = {
-  lobby: {
-    id: "lobby",
-    title: "Lobby",
-    peers: [],
-    locked: false
-  },
-  meething: {
-    id: "meething",
-    title: "Meething",
-    peers: [],
-    locked: false
+// Helper
+function clean(obj) {
+  for (var propName in obj) {
+    if (obj[propName] === null || obj[propName] === undefined || propName == "_" ) {
+      delete obj[propName];
+    }
   }
-};
+  return obj;
+}
+
+var env = {};
+var rooms = {};
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json({ type: "application/json" }));
-
-// ROUTES
-
 app.use("/favicon.ico", express.static("favicon.ico"));
 
 app.get("/", async (req, res) => {
-  res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
+  resyncRooms();
+  res.redirect('/rooms')
 });
 
 app.get("/r/:id", (req, res) => {
-  if (!rooms[req.params.id]) {
-    res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
-    //res.render("404");
-    return;
-  }
-  res.render("room", {
-    room: rooms[req.params.id],
-    gunRooms: gunRooms,
-    peerjs: {}
-  });
-});
+    // replace with gun check
+    if (!rooms[req.params.id]) {
+      console.log('missing room',req.params.id, rooms);
+      res.redirect('/rooms');
+      //res.render("rooms", { rooms: rooms });
+      return;
+    }
 
-// API
+    res.render("room", {
+      room: rooms[req.params.id], 
+      peerjs: {}
+    });
+
+  
+});
 
 app.post("/rooms", (req, res) => {
   var room = {
@@ -78,14 +74,17 @@ app.post("/rooms", (req, res) => {
     locked: req.body.locked
   };
   rooms[room.id] = room;
-  var gunRoom = gunRooms.get(req.body.title).put({ title: req.body.title, id: room.id, locked: req.body.locked });
   res.json(room);
 });
+
+// GUN Rooms
+
+app.use("/rooms", express.static(__dirname + "/views/rooms.html"));
 
 // NOT FOUND
 
 app.get("*", function(req, res) {
-  res.render("rooms", { rooms: rooms, gunRooms: gunRooms });
+  res.redirect('/rooms')
   //res.render("404");
 });
 
