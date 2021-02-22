@@ -1,11 +1,11 @@
 <img src="https://avatars.githubusercontent.com/u/62837502?s=200&v=4" width=100 />
 
-# openhøüse
+# [openhøüse](https://openhouse-meething.glitch.me/) 
 
 _decentralized audio chatrooms without government_
 
-- [Try it](https://openhouse-meething.glitch.me/)
-- [Remix it](https://glitch.com/edit/#!/remix/openhouse-meething)
+- [TRY IT](https://openhouse-meething.glitch.me/)
+- [REMIX](https://glitch.com/edit/#!/remix/openhouse-meething)
 
 [![openshouse](https://user-images.githubusercontent.com/1423657/107402868-bffcf780-6b04-11eb-947e-6798ebaaad65.png)](https://openhouse-meething.glitch.me)
 
