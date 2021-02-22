@@ -44,8 +44,8 @@ function startRoom() {
   })
     .then(res => res.json())
     .then(function(room){
-      (window.gunRooms.get(room.id).put({ title: room.title, id: room.id, locked: room.locked, owner: window.unique }) ) 
-      (window.location.href = "/r/" + room.id)
+      window.gunRooms.get(room.id).put({ title: room.title, id: room.id, locked: room.locked, owner: window.unique }); 
+      (window.location.href = "/r/" + room.id);
     })
     .catch(e => console.log(e));
 }

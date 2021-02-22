@@ -37,7 +37,7 @@ function clean(obj) {
 }
 
 var env = {};
-var rooms;
+var rooms = {};
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
