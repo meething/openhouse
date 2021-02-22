@@ -389,7 +389,7 @@ function killRoom(roomname,unique) {
   console.log('kill room', roomname, unique);
   window.gunRooms.get(roomname).open(function(data){
     console.log('room lookup',roomname);
-    if (data.title == 'lobby' || data.title == "Lobby") return;
+    if (data.id == 'lobby' || data.id == "Lobby") return;
     if ((data.id == roomname || data.title == roomname) && (data.owner == unique || !data.owner )) {
       console.log('room owner match!', data.id, unique);
       sendSignaling({ type: "peer-kill-room", peerId: localId });
