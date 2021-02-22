@@ -312,7 +312,7 @@ async function sendScreenToAll(mediaStream) {
     if (peer == localId) return;
     console.log("sharing to", peer, mediaStream);
     try {
-      localPeer.call(peer[0].id, mediaStream);
+      localPeer.call(i, mediaStream);
     } catch (e) {
       console.log(e);
     }
