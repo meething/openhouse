@@ -80,9 +80,22 @@ localPeer.on("open", localPeerId => {
     };
     // Audiocall Route
     localPeer.on("call", call => {
-      if (call.metadata) console.log('call meta',call.metadata);
-      call.answer(localStream);
-      call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
+      if (call.metadata) console.log('call metadata!',call.metadata);
+      if (call.metadata.type == "audio") {
+        call.answer(localStream);
+        call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
+      } else if (call.metadata.type == "screenshare") {
+        console.log('got screenshare stream!')
+        /*
+        call.answer(localStream);
+        call.on("stream", function(remoteStream){
+          video.srcObject = remoteStream
+          video.addEventListener('loadedmetadata', () => {
+            video.play()
+          })
+        });  
+        */
+      }
     });
     // Datachannels Route
     localPeer.on('connection', function(conn) {
@@ -109,7 +122,7 @@ localPeer.on("open", localPeerId => {
 function onPeerJoined(remotePeerId, localStream) {
   if (remotePeerId == localId) return;
   console.log("damn i see remote peer joined " + remotePeerId);
-  const call = localPeer.call(remotePeerId, localStream, {metadata: 'audio'});
+  const call = localPeer.call(remotePeerId, localStream, {metadata: {type: 'audio'} });
   call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
   notifyMe("joined " + remotePeerId);
 }
@@ -324,7 +337,7 @@ async function sendScreenToAll(mediaStream) {
     if (peer == localId) return;
     console.log("sharing to", peer, mediaStream);
     try {
-      localPeer.call(i, mediaStream, { metadata: 'screenshare'} );
+      localPeer.call(i, mediaStream, { metadata: { type: 'screenshare'} } );
     } catch (e) {
       console.log(e);
     }
