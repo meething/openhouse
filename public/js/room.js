@@ -80,11 +80,13 @@ localPeer.on("open", localPeerId => {
     };
     // Audiocall Route
     localPeer.on("call", call => {
+      if (call.metadata) console.log('call meta',call.metadata);
       call.answer(localStream);
       call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
     });
     // Datachannels Route
     localPeer.on('connection', function(conn) {
+        if (conn.metadata) console.log('connection meta',conn.metadata);
         conn.on('open', function() {
           // Receive Screenshare Frames
           conn.on('data', function(data) {
@@ -107,7 +109,7 @@ localPeer.on("open", localPeerId => {
 function onPeerJoined(remotePeerId, localStream) {
   if (remotePeerId == localId) return;
   console.log("damn i see remote peer joined " + remotePeerId);
-  const call = localPeer.call(remotePeerId, localStream);
+  const call = localPeer.call(remotePeerId, localStream, {metadata: 'audio'});
   call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
   notifyMe("joined " + remotePeerId);
 }
@@ -322,7 +324,7 @@ async function sendScreenToAll(mediaStream) {
     if (peer == localId) return;
     console.log("sharing to", peer, mediaStream);
     try {
-      localPeer.call(i, mediaStream);
+      localPeer.call(i, mediaStream, { metadata: 'screenshare'} );
     } catch (e) {
       console.log(e);
     }
