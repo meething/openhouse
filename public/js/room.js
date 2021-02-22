@@ -10,7 +10,7 @@ var dam = true;
 
 var username = prompt(
   "Please enter your username name",
-  "Anonymous" + Math.floor(Math.random() * (999 - 111 + 1)) + 111
+  "Anon" + Math.floor(Math.random() * (99 - 11 + 1)) + 11
 );
 
 function initFingerprintJS() {
