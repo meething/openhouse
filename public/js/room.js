@@ -359,23 +359,26 @@ function mediaAnalyze() {
   }
 }
 
-function lockRoom(roomname) {
-  lock = lock ? false : true;
-  lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
-  console.log("switch lock!", lock, roomname);
+function lockRoom(roomname,unique) {
   // TODO Block New Participants
   // TODO Update Room object for hiding
-  fetch(window.location.protocol + "rooms", {
-    method: "POST",
-    cache: "no-cache",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: roomname,
-      locked: true
-    })
+  if (roomname == 'lobby' || roomname == "Lobby") return;
+  console.log('lock room', roomname, unique);
+  window.gunRooms.get(roomname).open(function(data){
+    console.log('room lookup',roomname);
+    if ((data.id == roomname || data.title == roomname) && (data.owner == unique || !data.owner )) {
+      console.log('room owner match!', data.id, unique);
+      lock = lock ? false : true;
+      lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
+      console.log("switch lock!", lock, roomname);
+      window.gunRooms.get(roomname).get('lock').put(lock);
+    } else {
+      console.log('locking blocked!')
+    }
   })
-    .then(res => e => console.log(res))
-    .catch(e => console.log(e));
+  return false;
+  
+  
 }
 
 function killRoom(roomname,unique) {
@@ -392,7 +395,7 @@ function killRoom(roomname,unique) {
       console.log('delete blocked!')
     }
   })
-
+  return false;
 }
 
 // Helpers
