@@ -101,9 +101,11 @@ localPeer.on("open", localPeerId => {
       } else if (call.metadata.type == "screenshare") {
         console.log('got screenshare stream!')
         let video = document.getElementById("shareview");
+        let peerGrid = document.getElementById("peer-grid");
         call.answer(localStream);
         call.on("stream", function(remoteStream){
           screenButton.style.display = "none";
+          peerGrid.style.display = "none";
           video.srcObject = remoteStream
           video.addEventListener('loadedmetadata', () => {
             video.play()
@@ -111,6 +113,12 @@ localPeer.on("open", localPeerId => {
         });
         call.on('close', () => {
           screenButton.style.display = "block";
+          peerGrid.style.display = "block";
+          video.remove()
+        })
+        call.on('error', () => {
+          screenButton.style.display = "block";
+          peerGrid.style.display = "block";
           video.remove()
         })
       }
