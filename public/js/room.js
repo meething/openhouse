@@ -30,20 +30,6 @@ const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
 const screenButton = document.getElementById("screen-button");
 
-// Gun Counters
-Gun.chain.count = function (num) {
-  if (typeof num === 'number') {
-    this.path(Gun.text.random()).put(num);
-  }
-  if (typeof num === 'function') {
-    var sum = 0;
-    this.map().val(function (val) {
-      num(sum += val);
-    });
-  }
-  return this;
-};
-
 // Connect to multisocket for ROOMS only! DAM uses different scope
 var gun = Gun({
   peers: ["https://gundb-multiserver.glitch.me/openhouse"],
@@ -57,7 +43,8 @@ var gun = Gun({
 var gunRooms = gun.get("rooms");
 // GUN ROOM Scope (alternative channel)
 var gunRoom = gunRooms.get(ROOM_ID);
-gunRoom.get('name').put(ROOM_ID)
+countRoom();
+
 // BACKUP CHANNEL. Returns the last value. Needs TS > now()
 //gunRoom.on(function(data, key) {
 //  console.log("gun update:", data, key);
@@ -71,7 +58,6 @@ localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   localId = localPeerId;
   console.log("pushing self to DAMN", ROOM_ID, localPeerId);
-  gunRoom.get('count').count(+1);
   gunRoom.get('peers').get(localPeerId).put(localPeerId);
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
@@ -130,8 +116,8 @@ function onPeerLeft(remotePeerId) {
 function leaveRoom(e) {
   if (e) e.preventDefault();
   var bye = gunRoom.get('peers').path(localId).put(null);
-  gunRoom.get('count').count(-1);
   sendSignaling({ type: "peer-left-room", peerId: localId });
+  countRoom();
   window.location.href = "/";
 }
 
@@ -421,9 +407,13 @@ function clean(obj) {
 
 async function countRoom(roomname) {
   var count = await gunRoom.get('peers').once(function(data){
-    gunRoom.get('count').put(Object.keys(clean(data)).length)
+    var counter = Object.keys(clean(data));
+    gunRoom.get('count').put(Object.keys(counter).length)
+    if (counter <= 0){
+      // destroy room
+      
+    }
   });
-  return count;
 }
 
 async function getICEServers() {
@@ -483,15 +473,16 @@ async function loadDam(id) {
           case "join-room":
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
+            countRoom();
             // TRIGGER FOR peer-joined-room! do nothing or use for username pairing only
-            onPeerJoined(data.peerId, localStream);
-            gunRoom.get('peers').get(data.peerId).put(msg.signaling);
+            //onPeerJoined(data.peerId, localStream);
+            //gunRoom.get('peers').get(data.peerId).put(msg.signaling);
             break;
           case "peer-joined-room":
             console.log(data.type, data);
             remoteUsers[data.peerId] = data.username;
             onPeerJoined(data.peerId, localStream);
-            
+            countRoom();
             break;
           case "peer-kill-room":
             console.log(data.type, data);
@@ -502,10 +493,9 @@ async function loadDam(id) {
             delete remoteUsers[data.peerId];
             onPeerLeft(data.peerId);
             // cleanup
-            // gunRoom.get('count').count(-1);
             gunRoom.get('peers').path(data.peerId).put(null);
             //var count = gunRoom.get('peers').length;
-            sendLog('room state count '+count);
+            countRoom();
             break;
           case "peer-toggle-mute":
             console.log(data.type, data);
