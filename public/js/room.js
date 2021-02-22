@@ -119,6 +119,7 @@ function onPeerJoined(remotePeerId, localStream) {
 function onPeerLeft(remotePeerId) {
   if (remotePeerId == localId) return;
   console.log("damn i see remote peer left " + remotePeerId);
+  var bye = gunRoom.get('peers').path(remotePeerId).put(null);
   if (remotePeers[remotePeerId]) {
     remotePeers[remotePeerId].close();
     remotePeers[remotePeerId] = null;
@@ -128,8 +129,9 @@ function onPeerLeft(remotePeerId) {
 
 function leaveRoom(e) {
   if (e) e.preventDefault();
-  sendSignaling({ type: "peer-left-room", peerId: localId });
+  var bye = gunRoom.get('peers').path(localId).put(null);
   gunRoom.get('count').count(-1);
+  sendSignaling({ type: "peer-left-room", peerId: localId });
   window.location.href = "/";
 }
 
@@ -407,9 +409,19 @@ function killRoom(roomname,unique) {
 
 }
 
+// Helpers
+function clean(obj) {
+  for (var propName in obj) {
+    if (obj[propName] === null || obj[propName] === undefined || propName == "_" ) {
+      delete obj[propName];
+    }
+  }
+  return obj;
+}
+
 async function countRoom(roomname) {
-  var count = gunRoom.get('peers').once(function(data){
-    return Object.keys(data).length                                    
+  var count = await gunRoom.get('peers').once(function(data){
+    gunRoom.get('count').put(Object.keys(clean(data)).length)
   });
   return count;
 }
