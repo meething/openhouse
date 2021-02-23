@@ -75,7 +75,7 @@ localPeer.on("open", localPeerId => {
   gunRoom
     .get("peers")
     .get(localPeerId)
-    .put(localPeerId);
+    .put(new Date().getTime());
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
   sendSignaling({
@@ -575,7 +575,7 @@ async function loadDam(id) {
           countRoom();
           // TRIGGER FOR peer-joined-room! do nothing or use for username pairing only
           //onPeerJoined(data.peerId, localStream);
-          //gunRoom.get('peers').get(data.peerId).put(msg.signaling);
+          //gunRoom.get('peers').get(data.peerId).put(new Date().getTime());
           break;
         case "peer-joined-room":
           console.log(data.type, data);

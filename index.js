@@ -71,7 +71,7 @@ app.post("/rooms", (req, res) => {
   var room = {
     id: uuidv4(),
     title: req.body.title,
-    peers: [],
+    peers: {},
     locked: req.body.locked
   };
   rooms[room.id] = room;
