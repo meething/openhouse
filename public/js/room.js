@@ -503,7 +503,7 @@ function clean(obj) {
 }
 
 async function countRoom(roomname) {
-  var count = await gunRoom.get("peers").once(function(data) {
+  var count = gunRoom.get("peers").once(function(data) {
     var counter = Object.keys(clean(data));
     gunRoom.get("count").put(Object.keys(counter).length);
     if (counter <= 0) {
@@ -512,6 +512,20 @@ async function countRoom(roomname) {
       gunRoom.get("owner").once(function(owner) {
         killRoom(roomname, owner);
       });
+    } else {
+      // delete peers older than 1h
+      var now = new Date().getTime() - 3600;
+      for (const peer in clean(data)) {
+        try{
+          if (typeof data[peer] ==='number' && data[peer] < now ){
+            // killing old peer
+            gunRoom.get("peers").get(peer).put(null);
+          }  
+        } catch(e){
+          // not a date, kill it
+          gunRoom.get("peers").get(peer).put(null);
+        } 
+      }    
     }
   });
 }
