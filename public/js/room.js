@@ -1,27 +1,29 @@
 var remotePeers = {};
 var remoteUsers = {};
 var localStream = null;
+var localSharing = false;
 const localPeer = new Peer();
 var localId;
 var lock = false;
 
 var dam = true;
+var safe = false;
 
 var username = prompt(
   "Please enter your username name",
-  "Anonymous" + Math.floor(Math.random() * (999 - 111 + 1)) + 111
+  "Anon" + Math.floor(Math.random() * (99 - 11 + 1)) + 11
 );
 
 function initFingerprintJS() {
-    FingerprintJS.load().then(fp => {
-      // The FingerprintJS agent is ready.
-      // Get a visitor identifier when you'd like to.
-      fp.get().then(result => {
-        // This is the visitor identifier:
-        window.unique = result.visitorId;
-        console.log(window.unique);
-      });
+  FingerprintJS.load().then(fp => {
+    // The FingerprintJS agent is ready.
+    // Get a visitor identifier when you'd like to.
+    fp.get().then(result => {
+      // This is the visitor identifier:
+      window.unique = result.visitorId;
+      console.log(window.unique);
     });
+  });
 }
 
 const peerGrid = document.getElementById("peer-grid");
@@ -29,6 +31,7 @@ const muteButton = document.getElementById("mute-button");
 const shareButton = document.getElementById("share-button");
 const lockButton = document.getElementById("lock-button");
 const screenButton = document.getElementById("screen-button");
+const killButton = document.getElementById("kill-button");
 
 // Connect to multisocket for ROOMS only! DAM uses different scope
 var gun = Gun({
@@ -45,6 +48,17 @@ var gunRooms = gun.get("rooms");
 var gunRoom = gunRooms.get(ROOM_ID);
 countRoom();
 
+// OWNER BLOCK
+gunRoom.open(function(room) {
+  if (room && room.owner) {
+    if (room.owner != window.unique) {
+      if (safe) killButton.style.display = "none";
+    } else {
+      console.log("You own this room!", room.id);
+    }
+  }
+});
+
 // BACKUP CHANNEL. Returns the last value. Needs TS > now()
 //gunRoom.on(function(data, key) {
 //  console.log("gun update:", data, key);
@@ -58,7 +72,10 @@ localPeer.on("open", localPeerId => {
   // store localPeerId to Gun Room
   localId = localPeerId;
   console.log("pushing self to DAMN", ROOM_ID, localPeerId);
-  gunRoom.get('peers').get(localPeerId).put(localPeerId);
+  gunRoom
+    .get("peers")
+    .get(localPeerId)
+    .put(new Date().getTime());
   // notify DAM network, we joined!
   sendLog(username + " joined DAMN! PeerId: " + localPeerId);
   sendSignaling({
@@ -78,9 +95,47 @@ localPeer.on("open", localPeerId => {
       localStream.getAudioTracks()[0].enabled = true;
       onToggleMute();
     };
+    // Audiocall Route
     localPeer.on("call", call => {
-      call.answer(localStream);
-      call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
+      if (call.metadata) console.log("call metadata!", call.metadata);
+      if (call.metadata.type == "audio") {
+        call.answer(localStream);
+        call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
+      } else if (call.metadata.type == "screenshare") {
+        console.log("got a screenshare stream!");
+        let video = document.getElementById("shareview");
+        let peerGrid = document.getElementById("peer-grid");
+        localSharing = call;
+        call.answer(localStream);
+        call.on("stream", function(remoteStream) {
+          screenButton.style.display = "none";
+          peerGrid.style.visibility = "hidden";
+          video.srcObject = remoteStream;
+          video.addEventListener("loadedmetadata", () => {
+            video.play();
+          });
+        });
+        call.on("close", () => {
+          screenButton.style.display = "block";
+          peerGrid.style.visibility = "visible";
+          video.remove();
+        });
+        call.on("error", () => {
+          screenButton.style.display = "block";
+          peerGrid.style.display = "block";
+          video.remove();
+        });
+      }
+    });
+    // Datachannels Route (unused)
+    localPeer.on("connection", function(conn) {
+      if (conn.metadata) console.log("connection meta", conn.metadata);
+      conn.on("open", function() {
+        // Receive Screenshare Frames
+        conn.on("data", function(data) {
+          console.log("Received", data);
+        });
+      });
     });
 
     // JOIN-ROOM Trigger seems no longer needed?
@@ -97,7 +152,9 @@ localPeer.on("open", localPeerId => {
 function onPeerJoined(remotePeerId, localStream) {
   if (remotePeerId == localId) return;
   console.log("damn i see remote peer joined " + remotePeerId);
-  const call = localPeer.call(remotePeerId, localStream);
+  const call = localPeer.call(remotePeerId, localStream, {
+    metadata: { type: "audio" }
+  });
   call.on("stream", remoteStream => addPeerProfile(call, remoteStream));
   notifyMe("joined " + remotePeerId);
 }
@@ -105,7 +162,10 @@ function onPeerJoined(remotePeerId, localStream) {
 function onPeerLeft(remotePeerId) {
   if (remotePeerId == localId) return;
   console.log("damn i see remote peer left " + remotePeerId);
-  var bye = gunRoom.get('peers').path(remotePeerId).put(null);
+  var bye = gunRoom
+    .get("peers")
+    .path(remotePeerId)
+    .put(null);
   if (remotePeers[remotePeerId]) {
     remotePeers[remotePeerId].close();
     remotePeers[remotePeerId] = null;
@@ -115,7 +175,10 @@ function onPeerLeft(remotePeerId) {
 
 function leaveRoom(e) {
   if (e) e.preventDefault();
-  var bye = gunRoom.get('peers').path(localId).put(null);
+  var bye = gunRoom
+    .get("peers")
+    .path(localId)
+    .put(null);
   sendSignaling({ type: "peer-left-room", peerId: localId });
   countRoom();
   window.location.href = "/";
@@ -283,6 +346,12 @@ async function shareScreen(ev) {
   let videoElement = document.getElementById("shareview");
   // if we are already sharing, stop the sharing.
   if (sharingScreen) {
+    sendSignaling({
+      type: "stop-screen-share",
+      peerId: localId,
+      roomId: ROOM_ID,
+      username: username
+    });
     let tracks = videoElement.srcObject.getTracks();
     tracks.forEach(track => track.stop());
     videoElement.srcObject = null;
@@ -307,11 +376,21 @@ async function shareScreen(ev) {
   return;
 }
 
+async function stopScreenShare(id) {
+  let video = document.getElementById("shareview");
+  let peerGrid = document.getElementById("peer-grid");
+  localSharing.close();
+  screenButton.style.display = "block";
+  peerGrid.style.visibility = "visible";
+  video.remove();
+}
+
 async function sendScreenToAll(mediaStream) {
   localPeer._connections.forEach((peer, i) => {
+    if (peer == localId) return;
     console.log("sharing to", peer, mediaStream);
     try {
-      localPeer.call(peer[0].id, mediaStream);
+      localPeer.call(i, mediaStream, { metadata: { type: "screenshare" } });
     } catch (e) {
       console.log(e);
     }
@@ -359,46 +438,64 @@ function mediaAnalyze() {
   }
 }
 
-function lockRoom(roomname) {
-  lock = lock ? false : true;
-  lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
-  console.log("switch lock!", lock, roomname);
+function lockRoom(e, roomname, unique) {
+  e.preventDefault();
   // TODO Block New Participants
   // TODO Update Room object for hiding
-  fetch(window.location.protocol + "rooms", {
-    method: "POST",
-    cache: "no-cache",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: roomname,
-      locked: true
-    })
-  })
-    .then(res => e => console.log(res))
-    .catch(e => console.log(e));
+  if (roomname == "lobby" || roomname == "Lobby") return;
+  console.log("lock room", roomname, unique);
+  window.gunRooms.get(roomname).open(function(data) {
+    console.log("room lookup", roomname);
+    if (
+      (data.id == roomname || data.title == roomname) &&
+      (data.owner == unique || !data.owner)
+    ) {
+      console.log("room owner match!", data.id, unique);
+      lock = lock ? false : true;
+      lockButton.innerHTML = lock ? "&#128274;" : "&#128275;";
+      console.log("switch lock!", lock, roomname);
+      window.gunRooms
+        .get(roomname)
+        .get("lock")
+        .put(lock);
+      return false;
+    } else {
+      console.log("locking blocked!");
+      return false;
+    }
+  });
+  return false;
 }
 
-function killRoom(roomname,unique) {
-  if (roomname == 'lobby' || roomname == "Lobby") return;
-  console.log('kill room', roomname, unique);
-  window.gunRooms.get(roomname).open(function(data){
-    console.log('room lookup',roomname);
-    if ((data.id == roomname || data.title == roomname) && (data.owner == unique || !data.owner )) {
-      console.log('room owner match!', data.id, unique);
+function killRoom(roomname, unique) {
+  console.log("kill room", roomname, unique);
+  window.gunRooms.get(roomname).open(function(data) {
+    console.log("room lookup", roomname);
+    if (data.id == "lobby" || data.id == "Lobby") return;
+    if (
+      ((data.id == roomname || data.title == roomname) &&
+        (data.owner == unique || !data.owner)) ||
+      !safe
+    ) {
+      console.log("room owner match!", data.id, unique);
       sendSignaling({ type: "peer-kill-room", peerId: localId });
       var remove = window.gunRooms.path(data.id).put(null);
       window.location.href = "/rooms";
     } else {
-      console.log('delete blocked!')
+      console.log("delete blocked!");
     }
-  })
-
+  });
+  return false;
 }
 
 // Helpers
 function clean(obj) {
   for (var propName in obj) {
-    if (obj[propName] === null || obj[propName] === undefined || propName == "_" ) {
+    if (
+      obj[propName] === null ||
+      obj[propName] === undefined ||
+      propName == "_"
+    ) {
       delete obj[propName];
     }
   }
@@ -406,15 +503,29 @@ function clean(obj) {
 }
 
 async function countRoom(roomname) {
-  var count = await gunRoom.get('peers').once(function(data){
+  var count = gunRoom.get("peers").once(function(data) {
     var counter = Object.keys(clean(data));
-    gunRoom.get('count').put(Object.keys(counter).length)
-    if (counter <= 0){
+    gunRoom.get("count").put(Object.keys(counter).length);
+    if (counter <= 0) {
       // destroy empty room
-      console.log('destroying room',roomname);
-      gunRoom.get('owner').once(function(owner){
-          killRoom(roomname,owner);
+      console.log("destroying room", roomname);
+      gunRoom.get("owner").once(function(owner) {
+        killRoom(roomname, owner);
       });
+    } else {
+      // delete peers older than 1h
+      var now = new Date().getTime() - 3600;
+      for (const peer in clean(data)) {
+        try{
+          if (typeof data[peer] ==='number' && data[peer] < now ){
+            // killing old peer
+            gunRoom.get("peers").get(peer).put(null);
+          }  
+        } catch(e){
+          // not a date, kill it
+          gunRoom.get("peers").get(peer).put(null);
+        } 
+      }    
     }
   });
 }
@@ -459,82 +570,87 @@ async function loadDam(id) {
     file: false
   });
 
-  
-    console.log("Root DAM");
-    root.on("in", function(msg) {
-      if (msg.log) {
-        const { log } = msg.log;
-        console.log("got x-log!");
-        console.log(log);
+  console.log("Root DAM");
+  root.on("in", function(msg) {
+    if (msg.log) {
+      const { log } = msg.log;
+      console.log("got x-log!");
+      console.log(log);
+    }
+    if (msg.signaling) {
+      // Switch Call States
+      const { data } = msg.signaling;
+      if (data.peerId && data.peerId == localId) return;
+      console.log("got x-signaling!", data.type);
+      switch (data.type) {
+        case "join-room":
+          console.log(data.type, data);
+          remoteUsers[data.peerId] = data.username;
+          countRoom();
+          // TRIGGER FOR peer-joined-room! do nothing or use for username pairing only
+          //onPeerJoined(data.peerId, localStream);
+          //gunRoom.get('peers').get(data.peerId).put(new Date().getTime());
+          break;
+        case "peer-joined-room":
+          console.log(data.type, data);
+          remoteUsers[data.peerId] = data.username;
+          onPeerJoined(data.peerId, localStream);
+          countRoom();
+          break;
+        case "peer-kill-room":
+          console.log(data.type, data);
+          leaveRoom();
+          break;
+        case "peer-left-room":
+          console.log(data.type, data);
+          delete remoteUsers[data.peerId];
+          onPeerLeft(data.peerId);
+          // cleanup
+          gunRoom
+            .get("peers")
+            .path(data.peerId)
+            .put(null);
+          //var count = gunRoom.get('peers').length;
+          countRoom();
+          break;
+        case "peer-toggle-mute":
+          console.log(data.type, data);
+          onPeerToggleMute(data.peerId, data.isMuted);
+          break;
+        case "stop-screen-share":
+          console.log(data.type, data);
+          stopScreenShare();
+          break;
       }
-      if (msg.signaling) {
-        // Switch Call States
-        const { data } = msg.signaling;
-        if (data.peerId && data.peerId == localId) return;
-        console.log("got x-signaling!", data.type);
-        switch (data.type) {
-          case "join-room":
-            console.log(data.type, data);
-            remoteUsers[data.peerId] = data.username;
-            countRoom();
-            // TRIGGER FOR peer-joined-room! do nothing or use for username pairing only
-            //onPeerJoined(data.peerId, localStream);
-            //gunRoom.get('peers').get(data.peerId).put(msg.signaling);
-            break;
-          case "peer-joined-room":
-            console.log(data.type, data);
-            remoteUsers[data.peerId] = data.username;
-            onPeerJoined(data.peerId, localStream);
-            countRoom();
-            break;
-          case "peer-kill-room":
-            console.log(data.type, data);
-            leaveRoom();
-            break;
-          case "peer-left-room":
-            console.log(data.type, data);
-            delete remoteUsers[data.peerId];
-            onPeerLeft(data.peerId);
-            // cleanup
-            gunRoom.get('peers').path(data.peerId).put(null);
-            //var count = gunRoom.get('peers').length;
-            countRoom();
-            break;
-          case "peer-toggle-mute":
-            console.log(data.type, data);
-            onPeerToggleMute(data.peerId, data.isMuted);
-            break;
-        }
-      }
-      if (msg.image) {
-        const { image } = msg.image;
-        console.log("got x-image!");
-        var canvas = document.getElementById("canvas");
-        var img = new Image();
-        img.src = image;
-        img.onload = function() {
-          var ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0);
-        };
-      }
-      this.to.next(msg);
-    });
-    sendLog = log => {
-      //console.log("trying to send log", log);
-      const id = randId();
-      root.on("out", { "#": id, log: { name: user, log } });
-    };
-    sendSignaling = data => {
-      //console.log("trying to send signaling", data);
-      const id = randId();
-      root.on("out", { "#": id, signaling: { name: user, data } });
-    };
-    sendFrame = image => {
-      console.log("sending frame!");
-      const id = randId();
-      root.on("out", { "#": id, image: { image } });
-    };
-  
+    }
+    if (msg.image) {
+      const { image } = msg.image;
+      console.log("got x-image!");
+      var canvas = document.getElementById("canvas");
+      var img = new Image();
+      img.src = image;
+      img.onload = function() {
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+      };
+    }
+    this.to.next(msg);
+  });
+  sendLog = log => {
+    //console.log("trying to send log", log);
+    const id = randId();
+    root.on("out", { "#": id, log: { name: user, log } });
+  };
+  sendSignaling = data => {
+    //console.log("trying to send signaling", data);
+    const id = randId();
+    root.on("out", { "#": id, signaling: { name: user, data } });
+  };
+  sendFrame = image => {
+    console.log("sending frame!");
+    const id = randId();
+    root.on("out", { "#": id, image: { image } });
+  };
 
   function randId() {
     return Math.random()
